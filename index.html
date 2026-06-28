@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BACKROOMS RECRUITMENT SYSTEM</title>
+<title>BACKROOMS SYSTEM</title>
 
 <style>
 body{
@@ -33,78 +33,42 @@ body::before{
     pointer-events:none;
 }
 
-/* glitch */
-.glitch{
-    text-shadow:2px 0 red, -2px 0 blue;
-    animation:flicker 2s infinite;
-}
-@keyframes flicker{
-    0%,100%{opacity:1;}
-    50%{opacity:0.7;}
-}
+.screen{width:90%;max-width:900px;}
+.line{white-space:pre;font-size:15px;line-height:1.6;}
 
-/* layout */
-.screen{
-    width:90%;
-    max-width:900px;
-}
+.glitch{text-shadow:2px 0 red,-2px 0 blue;}
 
-.line{
-    white-space:pre;
-    font-size:15px;
-    line-height:1.6;
-}
-
-/* button */
 button{
     margin-top:20px;
     background:black;
     color:#00ff66;
     border:1px solid #00ff66;
     padding:10px 15px;
-    font-family:Courier New;
     cursor:pointer;
 }
-button:hover{
-    background:#00ff66;
-    color:black;
-}
 
-/* inputs */
+button:hover{background:#00ff66;color:black;}
+
 input{
     background:black;
     border:1px solid #00ff66;
     color:#00ff66;
     padding:6px;
-    margin-top:5px;
 }
 
-/* hidden screens */
-#form, #documentScreen, #loadingScreen{
-    display:none;
-}
+/* ekrany */
+#form,#loading,#doc{display:none;}
 
-/* LOADING BAR */
-.bar{
-    width:100%;
-    height:20px;
-    border:1px solid #00ff66;
-    margin-top:20px;
-}
-.barFill{
-    height:100%;
-    width:0%;
-    background:#00ff66;
-}
+/* loading bar */
+.bar{width:100%;height:20px;border:1px solid #00ff66;margin-top:20px;}
+.fill{height:100%;width:0%;background:#00ff66;}
 
-/* STAMP */
 .stamp{
     position:absolute;
     top:120px;
     right:60px;
     border:4px solid red;
     color:red;
-    font-weight:bold;
     padding:10px;
     transform:rotate(-10deg);
     opacity:0;
@@ -118,54 +82,46 @@ input{
 
 <!-- TERMINAL -->
 <div id="terminal">
-<div class="line glitch">BACKROOMS SYSTEM v1.0</div>
+<div class="line glitch">BACKROOMS SYSTEM</div>
 <br>
 <div class="line">Łączenie z Level 0...</div>
-<div class="line">[OK] Stabilne połączenie</div>
-<div class="line">[OK] Dostęp przyznany</div>
-<div class="line">STATUS: OCZEKIWANIE NA REKRUTA</div>
-<br>
-<button id="startBtn">WEJDŹ DO SYSTEMU</button>
+<div class="line">[OK] stabilne</div>
+<div class="line">STATUS: OCZEKIWANIE</div>
+
+<button id="start">WEJDŹ</button>
 </div>
 
 <!-- FORM -->
 <div id="form">
-<div class="line glitch">REJESTRACJA REKRUTA</div>
+<div class="line glitch">REJESTRACJA</div>
 <br>
 
-<label>IMIĘ I NAZWISKO:</label><br>
-<input id="name" type="text"><br><br>
-
-<button id="submitBtn">ZATWIERDŹ</button>
-
+<input id="name" placeholder="Imię i nazwisko">
 <br><br>
+
+<button id="send">ZATWIERDŹ</button>
+
 <div id="result"></div>
 </div>
 
 <!-- LOADING -->
-<div id="loadingScreen">
-<div class="line glitch">PRZETWARZANIE DANYCH...</div>
+<div id="loading">
+<div class="line glitch">PRZETWARZANIE...</div>
 <br>
 
-<div class="line" id="loadingText">Inicjalizacja akta...</div>
-
-<div class="bar"><div class="barFill" id="barFill"></div></div>
+<div class="line" id="loadingText">start...</div>
+<div class="bar"><div class="fill" id="fill"></div></div>
 </div>
 
-<!-- DOCUMENT -->
-<div id="documentScreen">
+<!-- DOC -->
+<div id="doc">
 
 <div class="stamp" id="stamp">ZAAKCEPTOWANO</div>
 
-<div class="line glitch">INSTYTUT BACKROOMS</div>
+<div class="line glitch">AKTA REKRUTA</div>
 <br>
 
-<div class="info-box" id="infoBox">
-<p><strong>NUMER AKT:</strong> BR-2026-074</p>
-<p><strong>POZIOM DOSTĘPU:</strong> 0</p>
-</div>
-
-<div class="line" id="finalText"></div>
+<div id="final"></div>
 
 </div>
 
@@ -173,99 +129,88 @@ input{
 
 <script>
 
-let recruitName = "";
-let recruitID = 0;
+let name = "";
+let id = 0;
+let userInteracted = false;
 
 /* START */
-document.getElementById("startBtn").onclick = () => {
-    document.getElementById("terminal").style.display = "none";
-    document.getElementById("form").style.display = "block";
+document.getElementById("start").onclick = () => {
+    userInteracted = true;
+    document.getElementById("terminal").style.display="none";
+    document.getElementById("form").style.display="block";
 };
 
 /* ID */
-function generateID(){
+function gen(){
     return Math.floor(100000 + Math.random()*900000);
 }
 
 /* SUBMIT */
-document.getElementById("submitBtn").onclick = () => {
+document.getElementById("send").onclick = () => {
 
-    recruitName = document.getElementById("name").value;
+    name = document.getElementById("name").value;
 
-    if(!recruitName){
-        alert("BRAK DANYCH");
-        return;
-    }
+    if(!name) return alert("Brak danych");
 
-    recruitID = generateID();
+    id = gen();
 
     document.getElementById("result").innerHTML =
         `<div class="line glitch">SUKCES</div>
-         <div class="line">REKRUT: ${recruitName}</div>
-         <div class="line">ID: ${recruitID}</div>`;
+         <div class="line">${name}</div>
+         <div class="line">ID: ${id}</div>`;
 
     startLoading();
 };
 
-/* LOADING EFFECT */
+/* LOADING */
 function startLoading(){
 
-    document.getElementById("form").style.display = "none";
-    document.getElementById("loadingScreen").style.display = "block";
+    document.getElementById("form").style.display="none";
+    document.getElementById("loading").style.display="block";
 
-    let bar = document.getElementById("barFill");
-    let text = document.getElementById("loadingText");
+    let bar = document.getElementById("fill");
+    let txt = document.getElementById("loadingText");
 
-    let progress = 0;
+    let p = 0;
 
-    let messages = [
-        "Inicjalizacja akta...",
-        "Skanowanie pamięci...",
-        "Łączenie z archiwum...",
-        "Analiza anomalii...",
-        "Tworzenie profilu..."
-    ];
-
+    let msgs = ["analiza...", "skan...", "archiwum...", "tworzenie profilu..."];
     let i = 0;
 
-    let interval = setInterval(() => {
+    let int = setInterval(()=>{
 
-        progress += 5;
-        bar.style.width = progress + "%";
+        p += 5;
+        bar.style.width = p + "%";
 
-        if(progress % 20 === 0 && i < messages.length){
-            text.innerText = messages[i];
-            i++;
+        if(p % 25 === 0){
+            txt.innerText = msgs[i++] || "finalizacja...";
         }
 
-        if(progress >= 100){
-            clearInterval(interval);
-            showDocument();
+        if(p >= 100){
+            clearInterval(int);
+            showDoc();
         }
 
-    }, 120);
+    },80);
 }
 
-/* DOCUMENT */
-function showDocument(){
+/* DOC */
+function showDoc(){
 
-    document.getElementById("loadingScreen").style.display = "none";
-    document.getElementById("documentScreen").style.display = "block";
+    document.getElementById("loading").style.display="none";
+    document.getElementById("doc").style.display="block";
 
-    document.getElementById("finalText").innerHTML =
-        `ZAREKRUTOWANO: ${recruitName}<br>ID SYSTEMOWE: ${recruitID}`;
+    document.getElementById("final").innerHTML =
+        `REKRUT: ${name}<br>ID SYSTEMOWE: ${id}`;
 
-    setTimeout(() => {
-        document.getElementById("stamp").style.opacity = 1;
-    }, 800);
+    setTimeout(()=>{
+        document.getElementById("stamp").style.opacity=1;
+    },600);
 
-    playSound();
-}
-
-/* SOUND */
-function playSound(){
-    const audio = new Audio("https://actions.google.com/sounds/v1/office/printer.ogg");
-    audio.play();
+    /* DŹWIĘK (DZIAŁA TYLKO PO INTERAKCJI) */
+    if(userInteracted){
+        let audio = new Audio("https://actions.google.com/sounds/v1/office/printer.ogg");
+        audio.play().catch(()=>{});
+    }
 }
 
 </script>
