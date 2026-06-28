@@ -5,7 +5,6 @@
 <title>BACKROOMS INSTITUTE // NODE 0</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <audio id="hum" src="audio/hum.mp3" loop></audio>
@@ -13,83 +12,117 @@
 <audio id="glitch" src="audio/glitch.mp3"></audio>
 
 <div id="nadzorca"></div>
+<div id="scanline"></div>
 <div id="glitchOverlay"></div>
+<div id="crtVignette"></div>
 
 <!-- BOOT -->
 <section id="boot" class="screen active">
-  <h1>INITIALIZING NODE 0...</h1>
-  <button onclick="next('intro')">CONTINUE</button>
+  <div class="boot-log" id="bootLog"></div>
 </section>
 
 <!-- INTRO -->
 <section id="intro" class="screen">
-  <h2>NADZORCA AI</h2>
-  <p id="introText"></p>
-  <button onclick="next('form')">START</button>
+  <h2 class="flicker">NADZORCA AI // v.2026.0</h2>
+  <p id="introText" class="typewriter"></p>
+  <button id="introBtn" class="hidden" onclick="next('form')">► KONTYNUUJ</button>
 </section>
 
 <!-- FORM -->
 <section id="form" class="screen">
-  <h2>REJESTRACJA</h2>
+  <h2>REJESTRACJA REKRUTA</h2>
+  <p class="subtitle">Wypełnij formularz zgodnie z prawdą. System weryfikuje.</p>
 
-  <input id="name" placeholder="Imię">
-  <input id="surname" placeholder="Nazwisko">
-  <input id="age" placeholder="Wiek">
-  <input id="role" placeholder="Dom / Funkcja">
+  <label>IMIĘ</label>
+  <input id="name" placeholder="..." autocomplete="off" spellcheck="false">
 
-  <div class="checkbox-line"><input type="checkbox"><span>Zgoda na obserwację</span></div>
-  <div class="checkbox-line"><input type="checkbox"><span>Zgoda na analizę</span></div>
-  <div class="checkbox-line"><input type="checkbox"><span>Akceptacja niestabilności rzeczywistości</span></div>
+  <label>NAZWISKO</label>
+  <input id="surname" placeholder="..." autocomplete="off" spellcheck="false">
 
-  <button onclick="next('quiz')">DALEJ</button>
+  <label>WIEK</label>
+  <input id="age" placeholder="..." type="number" min="1" max="99">
+
+  <label>FUNKCJA / DOM</label>
+  <input id="role" placeholder="..." autocomplete="off" spellcheck="false">
+
+  <div class="divider"></div>
+
+  <div class="checkbox-line">
+    <input type="checkbox" id="c1">
+    <span>Wyrażam zgodę na ciągłą obserwację przez system NADZORCA</span>
+  </div>
+  <div class="checkbox-line">
+    <input type="checkbox" id="c2">
+    <span>Wyrażam zgodę na pełną analizę percepcji i reaktywności</span>
+  </div>
+  <div class="checkbox-line">
+    <input type="checkbox" id="c3">
+    <span>Akceptuję niestabilność rzeczywistości jako stan normalny</span>
+  </div>
+
+  <p id="formError" class="error-msg hidden"></p>
+  <button onclick="validateForm()">DALEJ ►</button>
 </section>
 
 <!-- QUIZ -->
 <section id="quiz" class="screen">
-  <h2>KWESTIONARIUSZ</h2>
+  <h2>KWESTIONARIUSZ PERCEPCJI</h2>
+  <p class="subtitle" id="quizSubtitle"></p>
 
-  <p>Czy słyszysz szum?</p>
-  <select id="q1"><option>TAK</option><option>NIE</option></select>
+  <div class="question-block">
+    <p>01 &mdash; Czy słyszysz szum?</p>
+    <select id="q1">
+      <option value="" disabled selected>— wybierz —</option>
+      <option>TAK</option>
+      <option>NIE</option>
+    </select>
+  </div>
 
-  <p>Czy przestrzeń się zmienia?</p>
-  <select id="q2"><option>TAK</option><option>NIE</option></select>
+  <div class="question-block">
+    <p>02 &mdash; Czy przestrzeń wokół ciebie się zmienia?</p>
+    <select id="q2">
+      <option value="" disabled selected>— wybierz —</option>
+      <option>TAK</option>
+      <option>NIE</option>
+    </select>
+  </div>
 
-  <p>Czy jesteś obserwowany?</p>
-  <select id="q3"><option>TAK</option><option>NIE</option></select>
+  <div class="question-block">
+    <p>03 &mdash; Czy jesteś teraz obserwowany?</p>
+    <select id="q3">
+      <option value="" disabled selected>— wybierz —</option>
+      <option>TAK</option>
+      <option>NIE</option>
+    </select>
+  </div>
 
-  <button onclick="analyze()">ANALIZA</button>
-</section>
-
-<!-- ANALYSIS -->
-<section id="analysis" class="screen">
-  <h2>ANALIZA SYSTEMOWA</h2>
-  <p id="analysisText"></p>
+  <p id="quizError" class="error-msg hidden">Odpowiedz na wszystkie pytania.</p>
+  <p id="quizTimer" class="timer-warn hidden"></p>
+  <button onclick="validateQuiz()">ANALIZA ►</button>
 </section>
 
 <!-- LOADING -->
 <section id="loading" class="screen">
   <h2>PROCESSING NODE 0...</h2>
-  <p id="loadingText"></p>
-
+  <p id="loadingText" class="loading-label"></p>
   <div id="loadingBar">
     <div id="loadingFill"></div>
   </div>
+  <p id="loadingSubtext" class="loading-sub"></p>
 </section>
 
 <!-- INTERVENTION -->
 <section id="intervention" class="screen">
-  <h2>NADZORCA</h2>
-  <p id="nadzorcaMsg"></p>
-  <button onclick="next('docs')">CONTINUE</button>
+  <div class="intervention-header">NADZORCA // WIADOMOŚĆ SYSTEMOWA</div>
+  <p id="nadzorcaMsg" class="intervention-msg"></p>
+  <button onclick="next('docs')">ROZUMIEM ►</button>
 </section>
 
 <!-- AKTA -->
 <section id="docs" class="screen">
   <h2>AKTA REKRUTA</h2>
-
   <div id="paper"></div>
-
-  <button onclick="downloadFile()">DOWNLOAD AKTA</button>
+  <button onclick="downloadFile()">⬇ POBIERZ AKTA</button>
 </section>
 
 <script src="script.js"></script>
