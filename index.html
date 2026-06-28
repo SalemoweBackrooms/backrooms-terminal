@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>INSTITUTE // BACKROOMS ACCESS NODE</title>
+<title>BACKROOMS INSTITUTE NODE</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -13,57 +13,78 @@
 <audio id="activity" src="audio/activity.mp3"></audio>
 <audio id="glitch" src="audio/glitch.mp3"></audio>
 
+<button id="audioToggle" onclick="toggleAudio()">AUDIO: OFF</button>
+
 <!-- BOOT -->
 <div id="boot">
-  <div id="bootText"></div>
+  <div class="terminal">
+    <p>ŁADOWANIE SYSTEMU INSTYTUTU...</p>
+    <p>Synchronizacja BACKROOMS NODE...</p>
+    <p>AKTYWACJA NADZORCY AI...</p>
+    <p>STATUS: ONLINE</p>
+  </div>
 </div>
 
-<!-- TERMINAL -->
-<div id="terminal" class="hidden">
-  <div id="nadzorca"></div>
+<!-- NADZORCA -->
+<div id="nadzorcaBox" class="hidden">
+  <h2>NADZORCA</h2>
+  <p id="nadzorcaText"></p>
   <button onclick="startForm()">ROZPOCZNIJ REJESTRACJĘ</button>
 </div>
 
 <!-- FORMULARZ -->
 <div id="form" class="hidden">
-  <h2>KWESTIONARIUSZ REKRUTACYJNY</h2>
+
+  <h2>REJESTRACJA REKRUTA</h2>
 
   <input id="name" placeholder="Imię">
+  <input id="surname" placeholder="Nazwisko">
   <input id="age" placeholder="Wiek">
+  <input id="role" placeholder="Dom / Funkcja">
+
+  <h3>Zgody</h3>
+
+  <label><input type="checkbox" id="c1"> Zgadzam się na obserwację</label><br>
+  <label><input type="checkbox" id="c2"> Akceptuję analizę danych</label><br>
+  <label><input type="checkbox" id="c3"> Rozumiem brak gwarancji powrotu</label><br>
+
+  <button onclick="toQuestionnaire()">DALEJ</button>
+</div>
+
+<!-- KWESTIONARIUSZ -->
+<div id="quiz" class="hidden">
+
+  <h2>KWESTIONARIUSZ</h2>
 
   <p>Czy słyszysz dźwięki w pustych przestrzeniach?</p>
-  <select id="q1">
-    <option>TAK</option>
-    <option>NIE</option>
-  </select>
+  <select id="q1"><option>TAK</option><option>NIE</option></select>
 
-  <p>Czy akceptujesz obserwację?</p>
-  <select id="q2">
-    <option>TAK</option>
-    <option>NIE</option>
-  </select>
+  <p>Czy przestrzeń czasem „przeskakuje”?</p>
+  <select id="q2"><option>TAK</option><option>NIE</option></select>
 
-  <p>Czy miałeś kontakt z nieciągłością?</p>
-  <select id="q3">
-    <option>TAK</option>
-    <option>NIE</option>
-  </select>
+  <p>Czy sny się powtarzają?</p>
+  <select id="q3"><option>TAK</option><option>NIE</option></select>
 
-  <p>Czy pamiętasz wszystkie sny?</p>
-  <select id="q4">
-    <option>TAK</option>
-    <option>NIE</option>
-  </select>
+  <p>Czy czujesz obserwację?</p>
+  <select id="q4"><option>TAK</option><option>NIE</option></select>
 
-  <button onclick="submitForm()">PRZEŚLIJ DANE</button>
+  <button onclick="analyze()">ANALIZA</button>
+</div>
+
+<!-- ANALIZA -->
+<div id="analysis" class="hidden">
+  <h2>ANALIZA SYSTEMOWA</h2>
+  <p id="analysisText"></p>
 </div>
 
 <!-- AKTA -->
 <div id="files" class="hidden">
-  <h2>AKTA REKRUTA</h2>
-  <div id="file"></div>
 
-  <button onclick="downloadFile()">POBIERZ DOKUMENT</button>
+  <h2>AKTA REKRUTA</h2>
+
+  <div id="document"></div>
+
+  <button onclick="downloadFile()">POBIERZ AKTA</button>
 </div>
 
 <script src="script.js"></script>
