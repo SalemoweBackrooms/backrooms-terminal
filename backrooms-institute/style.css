@@ -1,45 +1,30 @@
 body {
-  margin: 0;
-  background: black;
-  color: #00ff9d;
+  margin:0;
+  background:black;
+  color:#00ff9d;
   font-family: monospace;
-  overflow: hidden;
 }
 
-.hidden {
-  display: none;
+.hidden { display:none; }
+
+#boot, #terminal, #form, #files {
+  padding:20px;
 }
 
-/* BOOT SCREEN */
-#boot-screen {
-  position: fixed;
-  inset: 0;
-  background: black;
-  padding: 20px;
-  color: #00ff9d;
+input, select, button {
+  background:black;
+  border:1px solid #00ff9d;
+  color:#00ff9d;
+  padding:6px;
+  margin:5px 0;
 }
 
-/* TERMINAL / FORM / FILES */
-#terminal, #form, #files {
-  padding: 20px;
-}
-
-/* GLITCH EFFECT */
 .glitch {
-  animation: flicker 0.25s infinite;
+  animation: flicker 0.2s infinite;
 }
 
 @keyframes flicker {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; filter: contrast(1.5); }
-  100% { opacity: 1; }
-}
-
-/* INPUT STYLE */
-input, select, button {
-  background: black;
-  border: 1px solid #00ff9d;
-  color: #00ff9d;
-  padding: 8px;
-  margin: 5px 0;
+  0% {opacity:1;}
+  50% {opacity:0.3;}
+  100% {opacity:1;}
 }
