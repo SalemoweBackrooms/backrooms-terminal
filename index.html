@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IEA — SYSTEM REKRUTACJI</title>
+<title>IEA // SYSTEM REKRUTACJI</title>
 
 <style>
 body{
 margin:0;
 background:black;
 color:#00ff66;
-font-family:Courier New;
+font-family:Courier New, monospace;
 height:100vh;
 display:flex;
 justify-content:center;
@@ -25,7 +25,7 @@ overflow:hidden;
 .glitch{text-shadow:2px 0 red,-2px 0 blue;}
 
 button{
-margin-top:20px;
+margin-top:15px;
 background:black;
 color:#00ff66;
 border:1px solid #00ff66;
@@ -39,11 +39,10 @@ background:black;
 border:1px solid #00ff66;
 color:#00ff66;
 padding:6px;
+width:60%;
 }
 
-.bar{width:100%;height:18px;border:1px solid #00ff66;margin-top:15px;}
-.fill{height:100%;width:0%;background:#00ff66;}
-
+/* GLITCH */
 #glitchOverlay{
 position:fixed;
 inset:0;
@@ -52,22 +51,11 @@ color:#00ff66;
 display:flex;
 justify-content:center;
 align-items:center;
-font-size:20px;
+font-size:22px;
 opacity:0;
 pointer-events:none;
 z-index:9999;
-}
-
-.stamp{
-position:absolute;
-top:120px;
-right:80px;
-border:4px solid red;
-color:red;
-padding:10px;
-transform:rotate(-10deg);
-opacity:0;
-font-weight:bold;
+letter-spacing:2px;
 }
 
 /* AUDIO */
@@ -75,36 +63,85 @@ font-weight:bold;
 position:fixed;
 bottom:20px;
 right:20px;
-background:#000;
+background:black;
 border:1px solid #00ff66;
 color:#00ff66;
 padding:8px;
 cursor:pointer;
 font-size:12px;
 }
+
+/* STAMP */
+.stamp{
+border:4px solid red;
+color:red;
+padding:10px;
+transform:rotate(-10deg);
+display:inline-block;
+font-weight:bold;
+opacity:0;
+}
+
+/* AKTA PODGLĄD */
+.documentPreview{
+background:#f3f0df;
+color:#000;
+padding:25px;
+margin-top:15px;
+border:3px solid #000;
+font-family:Courier New;
+position:relative;
+}
+
+/* watermark */
+.documentPreview::before{
+content:"INSTYTUT EKSPLOATACJI ANOMALII";
+position:absolute;
+top:40%;
+left:10%;
+font-size:40px;
+opacity:0.05;
+transform:rotate(-20deg);
+pointer-events:none;
+}
+
+/* scanlines */
+.documentPreview::after{
+content:"";
+position:absolute;
+inset:0;
+background:repeating-linear-gradient(
+0deg,
+rgba(0,0,0,0.05),
+rgba(0,0,0,0.05) 1px,
+transparent 3px
+);
+pointer-events:none;
+opacity:0.4;
+}
 </style>
 </head>
 
 <body>
 
-<div id="glitchOverlay">SYSTEM SYNC ERROR</div>
+<div id="glitchOverlay">BŁĄD SYNCHRONIZACJI</div>
 <button id="audioBtn" onclick="toggleAudio()">AUDIO: OFF</button>
 
 <!-- TERMINAL -->
 <div id="terminal" class="screen active">
 <div class="line glitch">INSTYTUT EKSPLOATACJI ANOMALII</div>
-<div class="line">SYSTEM REKRUTACJI v9.1</div>
+<div class="line">SYSTEM REKRUTACJI — POZIOM 0</div>
 <br>
 <div class="line">Łączenie z archiwum...</div>
 <button onclick="start()">WEJDŹ DO SYSTEMU</button>
 </div>
 
-<!-- RECRUIT -->
+<!-- REJESTRACJA -->
 <div id="recruit" class="screen">
 <div class="line glitch">REJESTRACJA REKRUTA</div>
 <br>
 <input id="name" placeholder="Imię i nazwisko">
-<br><br>
+<br>
 <button onclick="submitRecruit()">ZATWIERDŹ</button>
 <div id="result"></div>
 </div>
@@ -112,164 +149,138 @@ font-size:12px;
 <!-- LOADING -->
 <div id="loading" class="screen">
 <div class="line glitch">TWORZENIE AKT...</div>
-<div class="bar"><div class="fill" id="bar"></div></div>
-</div>
-
-<!-- STAMP -->
-<div id="stampScreen" class="screen">
-<div class="stamp" id="stamp">ZAAKCEPTOWANO</div>
-<div id="info"></div>
 </div>
 
 <!-- FORM -->
 <div id="form" class="screen">
 
-<div class="line glitch">FORMULARZ AKT PERSONALNYCH</div>
+<div class="line glitch">KWESTIONARIUSZ — DANE WEJŚCIOWE</div>
 
 <br>
 
 <input id="q_name" placeholder="Imię i nazwisko"><br><br>
-<input id="q_house" placeholder="Dom / Frakcja"><br><br>
+<input id="q_house" placeholder="Dom / frakcja"><br><br>
 <input id="q_year" placeholder="Rok szkolenia"><br><br>
 
 <br>
 
-<label><input type="checkbox" id="c1"> Procedury instytutu</label><br>
-<label><input type="checkbox" id="c2"> Anomalie przestrzenne</label><br>
-<label><input type="checkbox" id="c3"> Ryzyko operacyjne</label><br>
+<div class="line">PYTANIA KORUPCYJNE //</div>
+
+<label><input type="checkbox" id="c1"> Czy słyszysz dźwięk tła bez źródła?</label><br>
+<label><input type="checkbox" id="c2"> Czy ufność w rzeczywistość jest stabilna?</label><br>
+<label><input type="checkbox" id="c3"> Czy widziałeś miejsca, które „zmieniają się”?</label><br>
+<label><input type="checkbox" id="c4"> Czy akceptujesz procedury instytutu?</label><br>
 
 <br>
-<button onclick="submitForm()">GENERUJ AKTA</button>
+
+<button onclick="generateFiles()">GENERUJ AKTA</button>
 
 <div id="out"></div>
+
+<div id="preview"></div>
+
 </div>
 
 <script>
 
 let name="";
 let id=0;
-let audioEnabled=false;
-let ctx;
+let audioCtx;
 let noise;
-let gainNode;
+let gain;
 
-/* AUDIO BROWN NOISE */
-function initAudio(){
-ctx = new (window.AudioContext || window.webkitAudioContext)();
-
-let bufferSize = 2 * ctx.sampleRate;
-let noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-let output = noiseBuffer.getChannelData(0);
-
-for (let i = 0; i < bufferSize; i++) {
-output[i] = (Math.random() * 2 - 1) * 0.5;
+/* ================= AUDIO HUM BACKROOMS ================= */
+function toggleAudio(){
+if(audioCtx){
+audioCtx.close();
+audioCtx=null;
+document.getElementById("audioBtn").innerText="AUDIO: OFF";
+return;
 }
 
-noise = ctx.createBufferSource();
-noise.buffer = noiseBuffer;
+audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+let bufferSize = 2 * audioCtx.sampleRate;
+let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+let data = buffer.getChannelData(0);
+
+for(let i=0;i<bufferSize;i++){
+data[i] = (Math.random()*2-1) * 0.6;
+}
+
+noise = audioCtx.createBufferSource();
+noise.buffer = buffer;
 noise.loop = true;
 
-gainNode = ctx.createGain();
-gainNode.gain.value = 0.08;
+gain = audioCtx.createGain();
+gain.gain.value = 0.12;
 
-noise.connect(gainNode);
-gainNode.connect(ctx.destination);
+noise.connect(gain);
+gain.connect(audioCtx.destination);
 
 noise.start();
+document.getElementById("audioBtn").innerText="AUDIO: ON";
 }
 
-function toggleAudio(){
-audioEnabled=!audioEnabled;
-
-document.getElementById("audioBtn").innerText =
-audioEnabled ? "AUDIO: ON" : "AUDIO: OFF";
-
-if(audioEnabled){
-initAudio();
-}else{
-if(noise) noise.stop();
-if(ctx) ctx.close();
-}
-}
-
-/* NADZORCA */
-function npc(){
-let lines=[
-"...obserwacja nie zakończona.",
-"rekrut wykazuje nieciągłość tożsamości.",
-"archiwum reaguje na obecność jednostki.",
-"brak pełnej zgodności danych.",
-"jednostka została zauważona."
-];
-return lines[Math.floor(Math.random()*lines.length)];
-}
-
-/* GLITCH */
+/* ================= GLITCH ================= */
 function glitch(cb){
 let o=document.getElementById("glitchOverlay");
-let t=["SYNC","ERROR","REALIGN","///","ARCHIVE"];
+let frames=["SYNCH","ANALIZA","BŁĄD","REKONSTRUKCJA","///"];
 let i=0;
+
 o.style.opacity=1;
-let int=setInterval(()=>o.innerText=t[i++]||"///",120);
-setTimeout(()=>{clearInterval(int);o.style.opacity=0;cb();},900);
+
+let int=setInterval(()=>{
+o.innerText=frames[i++]||"///";
+},120);
+
+setTimeout(()=>{
+clearInterval(int);
+o.style.opacity=0;
+cb();
+},900);
 }
 
-/* SCREEN */
-function show(s){
-document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-document.getElementById(s).classList.add("active");
+/* ================= FLOW ================= */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 }
 
 function start(){glitch(()=>show("recruit"));}
 
 function genID(){
-return Math.floor(100000+Math.random()*900000);
+return Math.floor(100000 + Math.random()*900000);
 }
 
+/* ================= NADZORCA ================= */
+function supervisor(name){
+let logs=[
+`// LOG: jednostka ${name} zaakceptowana warunkowo.`,
+`// OBSERWACJA: brak pełnej zgodności percepcyjnej.`,
+`// SYSTEM: rekrut wykazuje adaptację anomalii.`,
+`// UWAGA: archiwum nie weryfikuje pełnej tożsamości.`,
+`// STATUS: przyjęcie mimo nieciągłości danych.`
+];
+return logs[Math.floor(Math.random()*logs.length)];
+}
+
+/* ================= SUBMIT ================= */
 function submitRecruit(){
 name=document.getElementById("name").value;
-if(!name) return alert("Brak danych");
+if(!name) return;
+
 id=genID();
-startLoading();
+
+glitch(()=>show("loading"));
+
+setTimeout(()=>{
+show("form");
+},900);
 }
 
-function startLoading(){
-show("loading");
-let b=document.getElementById("bar");
-let p=0;
-let int=setInterval(()=>{
-p+=6;
-b.style.width=p+"%";
-if(p>=100){
-clearInterval(int);
-showStamp();
-}
-},60);
-}
-
-function showStamp(){
-glitch(()=>{
-show("stampScreen");
-document.getElementById("stamp").style.opacity=1;
-document.getElementById("info").innerHTML=
-`REKRUT: ${name}<br>ID: ${id}<br><br><span class="line glitch">${npc()}</span>`;
-setTimeout(()=>glitch(()=>show("form")),1600);
-});
-}
-
-/* CYTAT PERSONALNY */
-function quote(name){
-let q=[
-`${name} — wykazuje tendencję do akceptacji niepewnej rzeczywistości.`,
-`${name} reaguje spokojem na anomalie percepcyjne.`,
-`${name} posiada niepokojącą zdolność adaptacji.`,
-`${name} nie odrzuca sygnałów nieistniejących.`,
-`${name} został sklasyfikowany jako potencjalnie zgodny z systemem.`,
-];
-return q[Math.floor(Math.random()*q.length)];
-}
-
-function submitForm(){
+/* ================= AKTA ================= */
+function generateFiles(){
 
 let qn=document.getElementById("q_name").value;
 let h=document.getElementById("q_house").value;
@@ -278,105 +289,66 @@ let y=document.getElementById("q_year").value;
 let c1=document.getElementById("c1").checked;
 let c2=document.getElementById("c2").checked;
 let c3=document.getElementById("c3").checked;
+let c4=document.getElementById("c4").checked;
 
-let outcome="AKCEPTACJA WARUNKOWA";
+let status="AKCEPTACJA WARUNKOWA";
 
-if(!qn||!h||!y) outcome="ODRZUT — BRAK DANYCH";
-if(Math.random()<0.2) outcome="ANOMALIA SYSTEMOWA";
-if(c1&&c2&&c3&&Math.random()<0.3) outcome="REKOMENDACJA: POZIOM UKRYTY";
+if(c1&&c3&&!c4) status="ANOMALIA ZAUWAŻONA";
+if(!c4) status="BRAK ZGODY SYSTEMOWEJ";
+if(Math.random()<0.15) status="REKORD NIEPEŁNY / KORUPCJA DANYCH";
 
-/* DOCUMENT */
-let doc=`
-<html>
-<head>
-<style>
-body{
-background:
-linear-gradient(rgba(0,0,0,0.08),rgba(0,0,0,0.2)),
-#f1efe7;
-font-family:"Courier New", monospace;
-padding:40px;
-}
+/* PREVIEW */
+document.getElementById("preview").innerHTML=`
 
-/* PAPER TEXTURE */
-body::before{
-content:"";
-position:fixed;
-inset:0;
-background-image:url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-opacity:0.25;
-pointer-events:none;
-}
+<div class="documentPreview">
 
-.paper{
-max-width:900px;
-margin:auto;
-background:rgba(255,255,255,0.88);
-border:2px solid #000;
-padding:30px;
-position:relative;
-}
+<h3>AKTA REKRUTA — INSTYTUT EKSPLOATACJI ANOMALII</h3>
 
-/* WATERMARK */
-.paper::before{
-content:"IEA — ARCHIWUM CENTRALNE";
-position:absolute;
-top:40%;
-left:5%;
-font-size:55px;
-opacity:0.06;
-transform:rotate(-20deg);
-}
+<p><b>Imię:</b> ${qn}</p>
+<p><b>ID:</b> ${id}</p>
+<p><b>Frakcja:</b> ${h}</p>
+<p><b>Poziom:</b> ${y}</p>
 
-.title{
-font-size:22px;
-font-weight:bold;
-margin-bottom:20px;
-}
+<hr>
 
-.section{
-margin:10px 0;
-padding:10px;
-border-bottom:1px dashed #000;
-}
+<p><b>Status:</b> ${status}</p>
 
-.stamp{
-color:#b30000;
-font-size:24px;
-font-weight:bold;
-border:3px solid #b30000;
-padding:10px;
-transform:rotate(-7deg);
-display:inline-block;
-box-shadow:2px 2px 0 #000;
-}
-</style>
-</head>
+<p><i>${supervisor(qn)}</i></p>
 
-<body>
-<div class="paper">
+<hr>
 
-<div class="title">INSTYTUT EKSPLOATACJI ANOMALII — AKTA REKRUTA</div>
-
-<div class="section">IMIĘ: ${qn}</div>
-<div class="section">ID: ${id}</div>
-<div class="section">FRAKCJA: ${h}</div>
-<div class="section">POZIOM SZKOLENIA: ${y}</div>
-
-<div class="section">STATUS: ${outcome}</div>
-
-<div class="section">${quote(qn)}</div>
-
-<br>
-
-<div class="stamp">${npc()}</div>
+<div class="stamp">ZAAKCEPTOWANO SYSTEMOWO</div>
 
 </div>
+`;
+
+/* DOWNLOAD HTML */
+let file=`
+<html>
+<head>
+<title>AKTA ${qn}</title>
+<style>
+body{
+font-family:Courier New;
+background:#f3f0df;
+padding:40px;
+}
+h1{font-size:20px;}
+</style>
+</head>
+<body>
+<h1>AKTA REKRUTA</h1>
+<p>Imię: ${qn}</p>
+<p>ID: ${id}</p>
+<p>Frakcja: ${h}</p>
+<p>Poziom: ${y}</p>
+<p>Status: ${status}</p>
+<p>${supervisor(qn)}</p>
 </body>
 </html>
 `;
 
-let blob=new Blob([doc],{type:"text/html"});
+let blob=new Blob([file],{type:"text/html"});
 let url=URL.createObjectURL(blob);
 
 let a=document.createElement("a");
@@ -386,8 +358,8 @@ a.click();
 
 URL.revokeObjectURL(url);
 
-document.getElementById("out").innerHTML =
-`<div class="line glitch">${npc()}</div>`;
+document.getElementById("out").innerHTML=
+`<div class="line glitch">${supervisor(qn)}</div>`;
 }
 
 </script>
