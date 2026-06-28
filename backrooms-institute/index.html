@@ -2,51 +2,68 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>INSTITUTE SYSTEM // BACKROOMS NODE</title>
+<title>INSTITUTE // BACKROOMS ACCESS NODE</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- 🔊 AUDIO -->
+<!-- AUDIO -->
 <audio id="hum" src="audio/hum.mp3" loop></audio>
 <audio id="activity" src="audio/activity.mp3"></audio>
 <audio id="glitch" src="audio/glitch.mp3"></audio>
 
-<!-- ⚡ BOOT -->
-<div id="boot-screen">
-  <div id="boot-text"></div>
+<!-- BOOT -->
+<div id="boot">
+  <div id="bootText"></div>
 </div>
 
-<!-- 🧠 TERMINAL -->
+<!-- TERMINAL -->
 <div id="terminal" class="hidden">
   <div id="nadzorca"></div>
   <button onclick="startForm()">ROZPOCZNIJ REJESTRACJĘ</button>
 </div>
 
-<!-- 🧾 FORMULARZ -->
+<!-- FORMULARZ -->
 <div id="form" class="hidden">
-  <h2>KWESTIONARIUSZ INSTYTUTU</h2>
+  <h2>KWESTIONARIUSZ REKRUTACYJNY</h2>
 
-  <label>Imię:</label>
-  <input id="name" type="text">
+  <input id="name" placeholder="Imię">
+  <input id="age" placeholder="Wiek">
 
-  <label>Wiek:</label>
-  <input id="age" type="number">
-
-  <label>Akceptacja obserwacji:</label>
-  <select id="observe">
+  <p>Czy słyszysz dźwięki w pustych przestrzeniach?</p>
+  <select id="q1">
     <option>TAK</option>
     <option>NIE</option>
   </select>
 
-  <button onclick="submitForm()">PRZEŚLIJ</button>
+  <p>Czy akceptujesz obserwację?</p>
+  <select id="q2">
+    <option>TAK</option>
+    <option>NIE</option>
+  </select>
+
+  <p>Czy miałeś kontakt z nieciągłością?</p>
+  <select id="q3">
+    <option>TAK</option>
+    <option>NIE</option>
+  </select>
+
+  <p>Czy pamiętasz wszystkie sny?</p>
+  <select id="q4">
+    <option>TAK</option>
+    <option>NIE</option>
+  </select>
+
+  <button onclick="submitForm()">PRZEŚLIJ DANE</button>
 </div>
 
-<!-- 📄 AKTA -->
+<!-- AKTA -->
 <div id="files" class="hidden">
   <h2>AKTA REKRUTA</h2>
-  <div id="file-content"></div>
+  <div id="file"></div>
+
+  <button onclick="downloadFile()">POBIERZ DOKUMENT</button>
 </div>
 
 <script src="script.js"></script>
