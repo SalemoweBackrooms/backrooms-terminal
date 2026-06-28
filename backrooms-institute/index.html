@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>INSTITUTE SYSTEM // BACKROOMS NODE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- 🔊 AUDIO -->
+<audio id="hum" src="audio/hum.mp3" loop></audio>
+<audio id="activity" src="audio/activity.mp3"></audio>
+<audio id="glitch" src="audio/glitch.mp3"></audio>
+
+<!-- ⚡ BOOT -->
+<div id="boot-screen">
+  <div id="boot-text"></div>
+</div>
+
+<!-- 🧠 TERMINAL -->
+<div id="terminal" class="hidden">
+  <div id="nadzorca"></div>
+  <button onclick="startForm()">ROZPOCZNIJ REJESTRACJĘ</button>
+</div>
+
+<!-- 🧾 FORMULARZ -->
+<div id="form" class="hidden">
+  <h2>KWESTIONARIUSZ INSTYTUTU</h2>
+
+  <label>Imię:</label>
+  <input id="name" type="text">
+
+  <label>Wiek:</label>
+  <input id="age" type="number">
+
+  <label>Akceptacja obserwacji:</label>
+  <select id="observe">
+    <option>TAK</option>
+    <option>NIE</option>
+  </select>
+
+  <button onclick="submitForm()">PRZEŚLIJ</button>
+</div>
+
+<!-- 📄 AKTA -->
+<div id="files" class="hidden">
+  <h2>AKTA REKRUTA</h2>
+  <div id="file-content"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
