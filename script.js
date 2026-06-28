@@ -677,7 +677,6 @@ function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote
     </p>
   </div>`;
 }
-}
 
 /* ═══════════════════════════════════════════════════
    DOWNLOAD
