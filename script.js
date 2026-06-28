@@ -1,130 +1,214 @@
-let audioOn = false;
-let status = "STABILNY";
+let audioStarted = false;
+let status = "UNKNOWN";
+let userID = "";
+let fileHTML = "";
 
-/* AUDIO */
-function toggleAudio(){
-  audioOn = !audioOn;
+/* AUDIO START */
+document.addEventListener("click", () => {
+  if(audioStarted) return;
 
-  document.querySelector("#audioPanel button").innerText =
-    audioOn ? "AUDIO: ON" : "AUDIO: OFF";
+  document.getElementById("hum").volume = 0.05;
+  document.getElementById("hum").play().catch(()=>{});
 
-  if(audioOn){
-    document.getElementById("hum").volume = 0.05;
-    document.getElementById("hum").play();
-  } else {
-    document.getElementById("hum").pause();
-  }
+  audioStarted = true;
+});
+
+/* SAFE AUDIO */
+function playSafe(id){
+  const a = document.getElementById(id);
+  if(!a) return;
+  a.pause();
+  a.currentTime = 0;
+  a.play().catch(()=>{});
 }
 
 /* GLITCH */
 function glitch(){
+  document.body.classList.add("glitching");
+
   const g = document.getElementById("glitchOverlay");
-  g.style.opacity = 0.6;
-  setTimeout(()=> g.style.opacity = 0, 120);
+  g.style.opacity = 0.4;
+
+  setTimeout(()=>{
+    g.style.opacity = 0;
+    document.body.classList.remove("glitching");
+  },140);
 }
 
 /* SCREEN ENGINE */
-function next(id){
+function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 
-  document.getElementById("click").play();
-
-  if(id === "intro"){
-    updateNadzorca("Jednostka wykryta. Rozpoczynanie procedury.");
-  }
-
-  if(id === "form"){
-    updateNadzorca("Rejestracja aktywna.");
-  }
-
-  if(id === "quiz"){
-    updateNadzorca("Przetwarzanie odpowiedzi...");
-  }
-
+  playSafe("glitch");
   glitch();
 }
 
-/* NADZORCA */
-function updateNadzorca(text){
-  document.getElementById("nadzorca").innerText = text;
+function next(id){
+  playSafe("activity");
+  show(id);
 }
 
-/* INTRO TEXT */
-window.onload = ()=>{
-  updateNadzorca("SYSTEM BOOT");
+/* NADZORCA SYSTEM (LIVE BACKGROUND) */
+let nadzorcaMessages = [
+  "System obserwuje...",
+  "Nie wykonuj zbędnych ruchów.",
+  "Twoje tempo jest nieregularne.",
+  "Obserwacja aktywna.",
+  "Brak pełnej zgodności danych.",
+  "Nie ignoruj procesu.",
+  "…czy nadal jesteś przy terminalu?"
+];
+
+function randomNadzorcaTick(){
+  let msg = nadzorcaMessages[
+    Math.floor(Math.random()*nadzorcaMessages.length)
+  ];
+
+  if(Math.random()>0.5){
+    msg = msg.replace(/ /g," ... ").slice(0, msg.length*0.7);
+  }
+
+  document.getElementById("nadzorca").innerText =
+    "NADZORCA: " + msg;
+
+  setTimeout(randomNadzorcaTick, 8000 + Math.random()*5000);
+}
+
+/* INIT */
+window.onload = () => {
   document.getElementById("introText").innerText =
-  "Nie opuszczaj procedury. Dane zostaną zapisane w Instytucie.";
+    "System monitoruje wejście...";
+
+  randomNadzorcaTick();
 };
 
-/* ANALIZA */
+/* ID */
+function generateID(){
+  return "BR-" + Math.floor(Math.random()*90) + "-" +
+         Math.floor(1000+Math.random()*9000) + "-2026";
+}
+
+/* ANALYSIS */
 function analyze(){
 
-  const score =
+  let score =
     (q1.value==="TAK"?1:0)+
     (q2.value==="TAK"?1:0)+
-    (q3.value==="TAK"?1:0)+
-    (q4.value==="TAK"?1:0);
+    (q3.value==="TAK"?1:0);
 
-  if(score>=3) status="ANOMALIA";
-  else if(score===2) status="NIESTABILNY";
-  else status="STABILNY";
-
-  updateNadzorca("Analiza zakończona: " + status);
+  status = score>=2 ? "ANOMALY" : "STABLE";
+  userID = generateID();
 
   document.getElementById("analysisText").innerText =
     "STATUS: " + status;
 
-  setTimeout(()=>generateDoc(),1500);
-  setTimeout(()=>next("document"),1800);
+  show("loading");
+  loadingSequence();
+}
+
+/* LOADING */
+function loadingSequence(){
+
+  const texts = [
+    "ANALYZING SUBJECT...",
+    "SYNC NODE 0...",
+    "ERROR DETECTED...",
+    "REALITY DRIFT...",
+    "COMPLETE..."
+  ];
+
+  let i = 0;
+
+  const interval = setInterval(()=>{
+    document.getElementById("loadingText").innerText = texts[i];
+    i++;
+
+    if(i >= texts.length){
+      clearInterval(interval);
+      setTimeout(intervention, 700);
+    }
+  },500);
+}
+
+/* INTERVENTION */
+function intervention(){
+
+  show("intervention");
+
+  const msgs = [
+    "Dokument wygenerowany.",
+    "System obserwuje.",
+    "Nie zaleca się interpretacji.",
+    "Twoje dane są niestabilne.",
+    "…to nie pierwszy przypadek."
+  ];
+
+  let msg = msgs[Math.floor(Math.random()*msgs.length)];
+
+  document.getElementById("nadzorcaMsg").innerText =
+    "NADZORCA: " + msg;
+
+  generateDocs();
 }
 
 /* AKTA */
-function generateDoc(){
+function generateDocs(){
 
   const name = document.getElementById("name").value;
   const surname = document.getElementById("surname").value;
   const age = document.getElementById("age").value;
   const role = document.getElementById("role").value;
 
-  const html = `
-  <div class="stamp">RECOVERED FILE</div>
+  fileHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AKTA</title>
+<style>
+body{
+  font-family:Courier;
+  background:#f3f0df;
+  padding:40px;
+}
+.stamp{
+  border:3px solid darkred;
+  color:darkred;
+  padding:10px;
+  display:inline-block;
+  transform:rotate(-6deg);
+}
+</style>
+<body>
 
-  <h2>AKTA REKRUTA // BACKROOMS INSTITUTE</h2>
+<h2>BACKROOMS INSTITUTE // FILE</h2>
+<div class="stamp">RECOVERED FILE</div>
 
-  <p><b>IMIĘ:</b> ${name}</p>
-  <p><b>NAZWISKO:</b> ${surname}</p>
-  <p><b>WIEK:</b> ${age}</p>
-  <p><b>DOM/FUNKCJA:</b> ${role}</p>
+<p>ID: ${userID}</p>
+<p>IMIĘ: ${name}</p>
+<p>NAZWISKO: ${surname}</p>
+<p>WIEK: ${age}</p>
+<p>FUNKCJA: ${role}</p>
+<p>STATUS: ${status}</p>
 
-  <div class="stamp">STATUS: ${status}</div>
+<p>RECOMMENDATION: CONTINUOUS OBSERVATION</p>
 
-  <p>
-  Jednostka zakwalifikowana do obserwacji.
-  Nadzorca zaleca ciągły monitoring.
-  </p>
-  `;
-
-  document.getElementById("paperDoc").innerHTML = html;
-
-  window.fileData = `
-BACKROOMS INSTITUTE FILE
-
-IMIĘ: ${name}
-NAZWISKO: ${surname}
-WIEK: ${age}
-FUNKCJA: ${role}
-STATUS: ${status}
-
--- END OF FILE --
+</body>
+</html>
 `;
 }
 
 /* DOWNLOAD */
-function downloadDoc(){
-  const blob = new Blob([window.fileData], {type:"text/plain"});
+function downloadFile(){
+  if(!fileHTML){
+    alert("FILE NOT READY");
+    return;
+  }
+
+  const blob = new Blob([fileHTML], {type:"text/html"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "AKTA_INSTYTUTU.txt";
+  a.download = "BACKROOMS_AKTA.html";
   a.click();
 }
