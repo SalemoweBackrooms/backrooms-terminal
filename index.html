@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BACKROOMS TERMINAL</title>
+
+<style>
+body{
+    margin:0;
+    background:#000;
+    color:#00ff66;
+    font-family:Courier New, monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.terminal{
+    width:90%;
+    max-width:900px;
+    padding:20px;
+}
+
+.line{
+    white-space:pre;
+    font-size:15px;
+    line-height:1.6;
+}
+
+.cursor{
+    display:inline-block;
+    width:10px;
+    background:#00ff66;
+    animation:blink 0.8s infinite;
+}
+
+@keyframes blink{
+    0%,50%{opacity:1;}
+    51%,100%{opacity:0;}
+}
+
+.glitch{
+    color:#00ff66;
+    text-shadow:
+        1px 0 red,
+        -1px 0 blue;
+}
+</style>
+</head>
+
+<body>
+
+<div class="terminal">
+
+<div class="line glitch">BACKROOMS EXPLORATION DIVISION SYSTEM</div>
+<br>
+
+<div class="line">Łączenie z węzłem Level 0...</div>
+<div class="line">[OK] Połączenie stabilne</div>
+<div class="line">[OK] Dostęp lokalny przyznany</div>
+<div class="line">[!] Wykryto niestabilność przestrzenną</div>
+<br>
+
+<div class="line">WPROWADŹ IDENTYFIKATOR REKRUTA:</div>
+<div class="line">> <span class="cursor"></span></div>
+
+<br><br>
+
+<div class="line">STATUS: OCZEKIWANIE...</div>
+
+</div>
+
+</body>
+</html>
