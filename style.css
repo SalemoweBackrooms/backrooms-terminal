@@ -1,113 +1,54 @@
 body{
   margin:0;
-  background: repeating-linear-gradient(
-    0deg,
-    #1b1b1b,
-    #1b1b1b 2px,
-    #222 4px
-  );
+  background:#151515;
+  color:#00ff9d;
   font-family: monospace;
-  color:#000;
 }
 
-/* SCREENS */
 .screen{
   display:none;
-  padding:40px;
+  padding:30px;
 }
+
 .screen.active{
   display:block;
 }
 
-/* NADZORCA */
 #nadzorca{
   position:fixed;
   top:10px;
   left:10px;
-  background:black;
-  color:#00ff9d;
-  padding:8px;
   font-size:12px;
-  z-index:999;
+  background:black;
+  padding:6px;
+  z-index:10;
 }
 
-/* GLITCH */
 #glitchOverlay{
   position:fixed;
   inset:0;
   background:white;
   opacity:0;
   pointer-events:none;
-  transition:0.1s;
+  transition:opacity 0.1s ease;
 }
 
-/* BOX */
-.box{
-  border:2px solid #000;
-  background:#f3f0df;
-  padding:20px;
-  max-width:900px;
+body.glitching{
+  filter: contrast(1.1) brightness(0.95);
 }
 
-/* PAPER DOC STYLE */
-.paper{
-  background:#f3f0df;
-  border:3px solid black;
-  padding:20px;
-  max-width:900px;
-}
-
-/* BANNER */
-.banner{
-  background:black;
-  color:white;
-  padding:10px;
-  font-size:12px;
-  letter-spacing:2px;
-  margin-bottom:15px;
-}
-
-/* SECTIONS */
-.section{
-  margin-top:15px;
-  font-weight:bold;
-}
-
-/* INPUTS */
-input, select{
-  display:block;
-  margin:10px 0;
-  padding:8px;
-  width:100%;
+input, select, button{
   background:black;
   color:#00ff9d;
   border:1px solid #00ff9d;
+  margin:6px 0;
+  padding:6px;
 }
 
-/* BUTTONS */
-button{
-  margin-top:15px;
-  padding:10px;
-  background:black;
-  color:#00ff9d;
-  border:1px solid #00ff9d;
-}
-
-/* AKTA PAPER */
-#paperDoc{
+#paper{
   background:#f3f0df;
-  padding:25px;
-  border:3px solid black;
-  box-shadow:0 0 40px rgba(0,0,0,0.7);
-}
-
-/* STAMPS */
-.stamp{
-  display:inline-block;
-  border:3px solid darkred;
-  color:darkred;
-  padding:8px;
-  transform:rotate(-10deg);
-  margin:10px 0;
-  font-weight:bold;
+  color:black;
+  padding:20px;
+  margin-top:20px;
+  border:2px solid black;
 }
