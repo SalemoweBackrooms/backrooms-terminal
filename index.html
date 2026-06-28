@@ -2,101 +2,90 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>BACKROOMS INSTITUTE NODE // LEVEL 0</title>
+<title>BACKROOMS INSTITUTE // NODE 0</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- AUDIO -->
 <audio id="hum" src="audio/hum.mp3" loop></audio>
-<audio id="click" src="audio/activity.mp3"></audio>
+<audio id="activity" src="audio/activity.mp3"></audio>
 <audio id="glitch" src="audio/glitch.mp3"></audio>
 
-<div id="audioPanel">
-  <button onclick="toggleAudio()">AUDIO: OFF</button>
-</div>
-
-<!-- NADZORCA GLOBALNY -->
-<div id="nadzorca">SYSTEM BOOTING...</div>
-
-<!-- GLITCH OVERLAY -->
+<div id="nadzorca"></div>
 <div id="glitchOverlay"></div>
 
 <!-- BOOT -->
 <section id="boot" class="screen active">
-  <div class="terminal">
-    <p>INITIALIZING BACKROOMS NODE...</p>
-    <p>LOADING INSTITUTE ARCHIVE...</p>
-    <p>CONNECTING SUPERVISOR AI...</p>
-    <p>STATUS: ONLINE</p>
-    <button onclick="next('intro')">CONTINUE</button>
-  </div>
+  <h1>INITIALIZING NODE 0...</h1>
+  <button onclick="next('intro')">CONTINUE</button>
 </section>
 
-<!-- INTRO NADZORCA -->
+<!-- INTRO -->
 <section id="intro" class="screen">
-  <div class="box">
-    <h2>NADZORCA</h2>
-    <p id="introText"></p>
-    <button onclick="next('form')">ROZPOCZNIJ REJESTRACJĘ</button>
-  </div>
+  <h2>NADZORCA AI</h2>
+  <p id="introText"></p>
+  <button onclick="next('form')">START</button>
 </section>
 
 <!-- FORM -->
 <section id="form" class="screen">
-  <div class="paper">
+  <h2>REJESTRACJA</h2>
 
-    <div class="banner">BACKROOMS INSTITUTE // PERSONNEL INTAKE FILE</div>
+  <input id="name" placeholder="Imię">
+  <input id="surname" placeholder="Nazwisko">
+  <input id="age" placeholder="Wiek">
+  <input id="role" placeholder="Dom / Funkcja">
 
-    <input id="name" placeholder="IMIĘ">
-    <input id="surname" placeholder="NAZWISKO">
-    <input id="age" placeholder="WIEK">
-    <input id="role" placeholder="DOM / FUNKCJA">
+  <label><input type="checkbox"> Zgoda na obserwację</label><br>
+  <label><input type="checkbox"> Zgoda na analizę</label><br>
+  <label><input type="checkbox"> Akceptacja niestabilności</label><br>
 
-    <div class="section">ZGODY</div>
-
-    <label><input type="checkbox" id="c1"> Zgoda na obserwację</label><br>
-    <label><input type="checkbox" id="c2"> Zgoda na analizę danych</label><br>
-    <label><input type="checkbox" id="c3"> Akceptacja braku powrotu</label><br>
-
-    <button onclick="next('quiz')">DALEJ</button>
-  </div>
+  <button onclick="next('quiz')">DALEJ</button>
 </section>
 
 <!-- QUIZ -->
 <section id="quiz" class="screen">
-  <div class="box">
-    <h2>KWESTIONARIUSZ</h2>
+  <h2>KWESTIONARIUSZ</h2>
 
-    <p>Czy słyszysz ciągły szum w pustych przestrzeniach?</p>
-    <select id="q1"><option>TAK</option><option>NIE</option></select>
+  <p>Czy słyszysz szum?</p>
+  <select id="q1"><option>TAK</option><option>NIE</option></select>
 
-    <p>Czy przestrzeń czasem się „przesuwa”?</p>
-    <select id="q2"><option>TAK</option><option>NIE</option></select>
+  <p>Czy przestrzeń się zmienia?</p>
+  <select id="q2"><option>TAK</option><option>NIE</option></select>
 
-    <p>Czy masz powtarzające się sny?</p>
-    <select id="q3"><option>TAK</option><option>NIE</option></select>
+  <p>Czy jesteś obserwowany?</p>
+  <select id="q3"><option>TAK</option><option>NIE</option></select>
 
-    <p>Czy czujesz obserwację?</p>
-    <select id="q4"><option>TAK</option><option>NIE</option></select>
-
-    <button onclick="analyze()">ANALIZA</button>
-  </div>
+  <button onclick="analyze()">ANALIZA</button>
 </section>
 
-<!-- ANALIZA -->
+<!-- ANALYSIS -->
 <section id="analysis" class="screen">
-  <div class="box">
-    <h2>ANALIZA SYSTEMOWA</h2>
-    <p id="analysisText"></p>
-  </div>
+  <h2>ANALIZA SYSTEMOWA</h2>
+  <p id="analysisText"></p>
+</section>
+
+<!-- LOADING -->
+<section id="loading" class="screen">
+  <h2>PROCESSING NODE 0...</h2>
+  <p id="loadingText"></p>
+</section>
+
+<!-- INTERVENTION -->
+<section id="intervention" class="screen">
+  <h2>NADZORCA</h2>
+  <p id="nadzorcaMsg"></p>
+  <button onclick="next('docs')">CONTINUE</button>
 </section>
 
 <!-- AKTA -->
-<section id="document" class="screen">
-  <div id="paperDoc"></div>
-  <button onclick="downloadDoc()">POBIERZ AKTA</button>
+<section id="docs" class="screen">
+  <h2>AKTA REKRUTA</h2>
+
+  <div id="paper"></div>
+
+  <button onclick="downloadFile()">DOWNLOAD AKTA</button>
 </section>
 
 <script src="script.js"></script>
