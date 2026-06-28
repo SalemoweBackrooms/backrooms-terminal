@@ -190,7 +190,7 @@ function validateForm() {
   const name    = document.getElementById("name").value.trim();
   const surname = document.getElementById("surname").value.trim();
   const age     = document.getElementById("age").value.trim();
-  const role    = document.getElementById("role").value.trim();
+  const role    = document.getElementById("role").value;
   const c1      = document.getElementById("c1").checked;
   const c2      = document.getElementById("c2").checked;
   const c3      = document.getElementById("c3").checked;
@@ -342,12 +342,17 @@ function loadingSequence() {
 function intervention() {
   show("intervention");
 
+  const roleKey = document.getElementById("role").value;
+  const house   = HOUSES[roleKey] || {};
+
   const msgs = [
     `Dokument wygenerowany, ${playerName}.`,
     `System obserwuje. Zawsze obserwuje.`,
     `Nie zaleca się interpretacji własnych akt.`,
     `${playerName} — twoje dane są niestabilne. To nie pierwszy taki przypadek.`,
-    `…to nie pierwszy raz, gdy ktoś stąd wychodzi z dokumentem. Nie wszyscy dochodzą do wyjścia.`,
+    `…nie wszyscy wychodzą stąd z dokumentem. Ty masz szczęście.`,
+    `${house.label ? house.label + ". " : ""}System odnotował twój wybór.`,
+    `${playerName}. ${house.motto || "System obserwuje."}`,
   ];
 
   const el  = document.getElementById("nadzorcaMsg");
@@ -358,16 +363,95 @@ function intervention() {
 }
 
 /* ═══════════════════════════════════════════════════
+   HOUSE DATA
+═══════════════════════════════════════════════════ */
+const HOUSES = {
+  "Gryffindor": {
+    color1:  "#7f0909",
+    color2:  "#ffc500",
+    label:   "GRYFFINDOR",
+    crest:   "🦁",
+    title:   "Adept Magiczny",
+    motto:   "Odwaga, odwaga, zawsze odwaga.",
+    facts: [
+      "Adepci Gryffindoru słyną z nieustraszoności — i nieprzemyślanych decyzji.",
+      "Dom założony przez Godrica Gryffindora, mistrza walk magicznych.",
+      "Złoto i szkarłat — kolory krwi i ognia. Pasujące do tych, którzy zawsze wbiegają pierwsi.",
+      "Symbolem domu jest lew — dumny, głośny i rzadko ostrożny.",
+    ]
+  },
+  "Hufflepuff": {
+    color1:  "#ecb939",
+    color2:  "#372e29",
+    label:   "HUFFLEPUFF",
+    crest:   "🦡",
+    title:   "Adept Magiczny",
+    motto:   "Lojalność jest rzadką magią.",
+    facts: [
+      "Hufflepuff wydał więcej Aurorów niż jakikolwiek inny dom — po cichu.",
+      "Dom założony przez Helgę Hufflepuff, która jako jedyna przyjmowała wszystkich.",
+      "Żółć i czerń — kolor pszczoły. Pracowitość bywa groźniejsza niż błyskotliwość.",
+      "Borsuk kopie głęboko i długo. Adepci Hufflepuffu też.",
+    ]
+  },
+  "Ravenclaw": {
+    color1:  "#0e1a40",
+    color2:  "#946b2d",
+    label:   "RAVENCLAW",
+    crest:   "🦅",
+    title:   "Adept Magiczny",
+    motto:   "Wiedza to jedyna magia, której nie można zabrać.",
+    facts: [
+      "Wejście do wieży Ravenclawu strzeże zagadka — nie hasło. Niektórzy czekają godzinami.",
+      "Dom założony przez Rowenę Ravenclaw, która podobno utraciła diadem dla miłości.",
+      "Niebieskie i brązowe — barwy nieba i ziemi. Mądrość w teorii i w praktyce.",
+      "Orzeł widzi dalej. Adepci Ravenclawu też — czasem za daleko.",
+    ]
+  },
+  "Slytherin": {
+    color1:  "#1a472a",
+    color2:  "#aaaaaa",
+    label:   "SLYTHERIN",
+    crest:   "🐍",
+    title:   "Adept Magiczny",
+    motto:   "Cel uświęca środki. System to potwierdza.",
+    facts: [
+      "Nie każdy ze Slytherinu jest zły. Ale system i tak ich obserwuje uważniej.",
+      "Dom założony przez Salazara Slytherina — jedynego z założycieli, który odszedł.",
+      "Zieleń i srebro — barwy ambicji i chłodnej kalkulacji.",
+      "Wąż nie atakuje bez powodu. Adepci Slytherinu też nie.",
+    ]
+  },
+  "Nauczyciel": {
+    color1:  "#3b1f5e",
+    color2:  "#c9a0dc",
+    label:   "KADRA SALEM",
+    crest:   "✦",
+    title:   "Nauczyciel / Kadra",
+    motto:   "Uczysz magii. System uczy ciebie.",
+    facts: [
+      "Kadra Szkoły Salem przeszła weryfikację poziomu 0. Większość o tym nie wie.",
+      "Nauczyciel to nie tylko funkcja — to kategoria obserwacji.",
+      "Fiolet — kolor wiedzy i autorytetu. System odnotowuje jedno i drugie.",
+      "Nie wszystkie drzwi w Salem są dla uczniów. Niektóre są tylko dla kadry. Inne — dla nikogo.",
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════════════════
    GENERATE DOCS
 ═══════════════════════════════════════════════════ */
 function generateDocs() {
   const name    = document.getElementById("name").value;
   const surname = document.getElementById("surname").value;
   const age     = document.getElementById("age").value;
-  const role    = document.getElementById("role").value;
+  const roleKey = document.getElementById("role").value;
   const date    = new Date().toLocaleDateString("pl-PL");
 
   userID = userID || generateID();
+
+  const house = HOUSES[roleKey] || HOUSES["Gryffindor"];
+  const fact  = house.facts[Math.floor(Math.random() * house.facts.length)];
 
   const quotes = [
     "Jednostka wykazuje adaptację do niestabilnych struktur rzeczywistości.",
@@ -384,16 +468,22 @@ function generateDocs() {
 
   const quote = quotes[Math.floor(Math.random() * quotes.length)];
 
-  const styles = `
-    font-family:'Courier New',Courier,monospace;
-    font-size:13px;
-    line-height:1.8;
-    color:#1a1a1a;
-    background:#ede8d3;
-    padding:30px 28px;
-    max-width:620px;
-    margin:0 auto;
-    border:1px solid #aaa;
+  // Pasek domu — HTML inline
+  const houseBarHTML = `
+    <div style="
+      margin: 0 -28px 20px -28px;
+      padding: 10px 28px;
+      background: linear-gradient(90deg, ${house.color1}, ${house.color2});
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Courier New', monospace;
+    ">
+      <span style="font-size:22px;">${house.crest}</span>
+      <span style="color:#fff; font-size:11px; font-weight:bold; letter-spacing:0.15em;">
+        ${house.label} &mdash; ${house.title}
+      </span>
+    </div>
   `;
 
   const paper = document.getElementById("paper");
@@ -402,13 +492,16 @@ function generateDocs() {
     <div class="stamp">RECOVERED<br>FILE</div>
     <div class="stamp2">BACKROOMS INSTITUTE<br>VERIFIED</div>
 
-    <h3>AKTA REKRUTA</h3>
+    <h3>AKTA REKRUTA // SZKOŁA MAGII SALEM</h3>
+
+    ${houseBarHTML}
 
     <p><b>ID:</b> ${userID}</p>
     <p><b>IMIĘ:</b> ${name}</p>
     <p><b>NAZWISKO:</b> ${surname}</p>
     <p><b>WIEK:</b> ${age}</p>
-    <p><b>FUNKCJA / DOM:</b> ${role}</p>
+    <p><b>DOM / FUNKCJA:</b> ${house.label}</p>
+    <p><b>TYTUŁ:</b> ${house.title}</p>
     <p><b>DATA REJESTRACJI:</b> ${date}</p>
 
     <hr>
@@ -418,34 +511,64 @@ function generateDocs() {
 
     <hr>
 
-    <p><b>CYTAT SYSTEMOWY:</b></p>
+    <p><b>MOTTO:</b></p>
+    <p><i>"${house.motto}"</i></p>
+
+    <p style="margin-top:10px;"><b>NOTATKA SYSTEMOWA:</b></p>
+    <p style="font-size:12px;color:#444;">${fact}</p>
+
+    <hr>
+
+    <p><b>CYTAT NADZORCY:</b></p>
     <p><i>"${quote}"</i></p>
 
     <hr>
 
     <p><b>REKOMENDACJA:</b> CONTINUOUS OBSERVATION</p>
-    <p style="font-size:11px;color:#666;margin-top:16px;">
+    <p style="font-size:11px;color:#888;margin-top:16px;">
       Dokument wygenerowany automatycznie przez NADZORCA v.2026.0.<br>
       Wszelkie próby edycji zostaną odnotowane.
     </p>
   `;
 
-  // Zapamiętaj HTML do pobrania (ze stylami inline)
+  // Plik do pobrania — pełne style inline
   fileHTML = `<!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <title>AKTA // ${userID}</title>
 <style>
-  body { margin: 0; padding: 40px; background: #ede8d3; }
-  div[style] { position: relative; }
+  body {
+    margin: 0; padding: 40px;
+    background: #c8c0a8;
+    font-family: 'Courier New', Courier, monospace;
+  }
+  .doc {
+    position: relative;
+    background: #ede8d3;
+    color: #1a1a1a;
+    padding: 30px 28px;
+    max-width: 620px;
+    margin: 0 auto;
+    border: 1px solid #aaa;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .house-bar {
+    margin: 0 -28px 20px -28px;
+    padding: 10px 28px;
+    background: linear-gradient(90deg, ${house.color1}, ${house.color2});
+    display: flex; align-items: center; gap: 12px;
+  }
+  .house-bar .crest { font-size: 22px; }
+  .house-bar .label { color: #fff; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; }
   .stamp {
     position: absolute; top: 16px; right: 20px;
     border: 3px solid #8b0000; color: #8b0000;
     padding: 6px 10px; font-size: 10px; font-weight: bold;
     letter-spacing: 0.1em; transform: rotate(-8deg);
     opacity: 0.85; text-align: center; line-height: 1.4;
-    font-family: 'Courier New', monospace;
   }
   .stamp2 {
     position: absolute; bottom: 20px; left: 20px;
@@ -453,17 +576,60 @@ function generateDocs() {
     padding: 6px 10px; font-size: 10px; font-weight: bold;
     letter-spacing: 0.08em; transform: rotate(3deg);
     opacity: 0.8; line-height: 1.4;
-    font-family: 'Courier New', monospace;
   }
-  h3 { font-size: 15px; letter-spacing: 0.12em; text-align: center;
-       margin-bottom: 16px; border-bottom: 1px solid #aaa; padding-bottom: 10px; }
+  h3 {
+    font-size: 14px; letter-spacing: 0.12em; text-align: center;
+    margin-bottom: 16px; border-bottom: 1px solid #aaa; padding-bottom: 10px;
+  }
   p { margin: 5px 0; }
   hr { border: none; border-top: 1px solid #aaa; margin: 14px 0; }
 </style>
 </head>
 <body>
-<div style="${styles}">
-  ${paper.innerHTML}
+<div class="doc">
+  <div class="stamp">RECOVERED<br>FILE</div>
+  <div class="stamp2">BACKROOMS INSTITUTE<br>VERIFIED</div>
+
+  <h3>AKTA REKRUTA // SZKOŁA MAGII SALEM</h3>
+
+  <div class="house-bar">
+    <span class="crest">${house.crest}</span>
+    <span class="label">${house.label} &mdash; ${house.title}</span>
+  </div>
+
+  <p><b>ID:</b> ${userID}</p>
+  <p><b>IMIĘ:</b> ${name}</p>
+  <p><b>NAZWISKO:</b> ${surname}</p>
+  <p><b>WIEK:</b> ${age}</p>
+  <p><b>DOM / FUNKCJA:</b> ${house.label}</p>
+  <p><b>TYTUŁ:</b> ${house.title}</p>
+  <p><b>DATA REJESTRACJI:</b> ${date}</p>
+
+  <hr>
+
+  <p><b>STATUS:</b> ${status}</p>
+  <p><b>UWAGA:</b> ${statusNote}</p>
+
+  <hr>
+
+  <p><b>MOTTO:</b></p>
+  <p><i>"${house.motto}"</i></p>
+
+  <p style="margin-top:10px;"><b>NOTATKA SYSTEMOWA:</b></p>
+  <p style="font-size:12px;color:#444;">${fact}</p>
+
+  <hr>
+
+  <p><b>CYTAT NADZORCY:</b></p>
+  <p><i>"${quote}"</i></p>
+
+  <hr>
+
+  <p><b>REKOMENDACJA:</b> CONTINUOUS OBSERVATION</p>
+  <p style="font-size:11px;color:#888;margin-top:16px;">
+    Dokument wygenerowany automatycznie przez NADZORCA v.2026.0.<br>
+    Wszelkie próby edycji zostaną odnotowane.
+  </p>
 </div>
 </body>
 </html>`;
