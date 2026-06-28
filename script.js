@@ -3,7 +3,7 @@ let status = "UNKNOWN";
 let userID = "";
 let fileHTML = "";
 
-/* AUDIO START */
+/* AUDIO INIT */
 document.addEventListener("click", () => {
   if(audioStarted) return;
 
@@ -35,7 +35,7 @@ function glitch(){
   },140);
 }
 
-/* SCREEN ENGINE */
+/* SCREEN SYSTEM */
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -49,7 +49,7 @@ function next(id){
   show(id);
 }
 
-/* NADZORCA SYSTEM (LIVE BACKGROUND) */
+/* NADZORCA LIVE */
 let nadzorcaMessages = [
   "System obserwuje...",
   "Nie wykonuj zbędnych ruchów.",
@@ -61,9 +61,7 @@ let nadzorcaMessages = [
 ];
 
 function randomNadzorcaTick(){
-  let msg = nadzorcaMessages[
-    Math.floor(Math.random()*nadzorcaMessages.length)
-  ];
+  let msg = nadzorcaMessages[Math.floor(Math.random()*nadzorcaMessages.length)];
 
   if(Math.random()>0.5){
     msg = msg.replace(/ /g," ... ").slice(0, msg.length*0.7);
@@ -107,7 +105,7 @@ function analyze(){
   loadingSequence();
 }
 
-/* LOADING */
+/* LOADING FIX */
 function loadingSequence(){
 
   const texts = [
@@ -119,15 +117,22 @@ function loadingSequence(){
   ];
 
   let i = 0;
+  let progress = 0;
 
   const interval = setInterval(()=>{
+
     document.getElementById("loadingText").innerText = texts[i];
+
     i++;
+    progress += 25;
+
+    document.getElementById("loadingFill").style.width = progress + "%";
 
     if(i >= texts.length){
       clearInterval(interval);
       setTimeout(intervention, 700);
     }
+
   },500);
 }
 
@@ -144,10 +149,8 @@ function intervention(){
     "…to nie pierwszy przypadek."
   ];
 
-  let msg = msgs[Math.floor(Math.random()*msgs.length)];
-
   document.getElementById("nadzorcaMsg").innerText =
-    "NADZORCA: " + msg;
+    "NADZORCA: " + msgs[Math.floor(Math.random()*msgs.length)];
 
   generateDocs();
 }
@@ -167,18 +170,8 @@ function generateDocs(){
 <meta charset="UTF-8">
 <title>AKTA</title>
 <style>
-body{
-  font-family:Courier;
-  background:#f3f0df;
-  padding:40px;
-}
-.stamp{
-  border:3px solid darkred;
-  color:darkred;
-  padding:10px;
-  display:inline-block;
-  transform:rotate(-6deg);
-}
+body{font-family:Courier;background:#f3f0df;padding:40px;}
+.stamp{border:3px solid darkred;color:darkred;padding:10px;display:inline-block;transform:rotate(-6deg);}
 </style>
 <body>
 
