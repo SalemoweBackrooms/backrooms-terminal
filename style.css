@@ -71,3 +71,25 @@ input, select, button{
   margin-top:20px;
   border:2px solid black;
 }
+
+/* PIECZĘCIE */
+.stamp{
+  border:3px solid darkred;
+  color:darkred;
+  padding:10px;
+  display:inline-block;
+  transform:rotate(-6deg);
+  margin-bottom:10px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.stamp2{
+  border:3px solid #003b8e;
+  color:#003b8e;
+  padding:8px;
+  display:inline-block;
+  transform:rotate(4deg);
+  margin-left:10px;
+  font-size:12px;
+}
