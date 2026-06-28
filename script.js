@@ -3,7 +3,7 @@ let status = "UNKNOWN";
 let userID = "";
 let fileHTML = "";
 
-/* AUDIO INIT */
+/* AUDIO */
 document.addEventListener("click", () => {
   if(audioStarted) return;
 
@@ -49,14 +49,13 @@ function next(id){
   show(id);
 }
 
-/* NADZORCA LIVE */
+/* NADZORCA */
 let nadzorcaMessages = [
   "System obserwuje...",
   "Nie wykonuj zbędnych ruchów.",
   "Twoje tempo jest nieregularne.",
   "Obserwacja aktywna.",
   "Brak pełnej zgodności danych.",
-  "Nie ignoruj procesu.",
   "…czy nadal jesteś przy terminalu?"
 ];
 
@@ -73,7 +72,6 @@ function randomNadzorcaTick(){
   setTimeout(randomNadzorcaTick, 8000 + Math.random()*5000);
 }
 
-/* INIT */
 window.onload = () => {
   document.getElementById("introText").innerText =
     "System monitoruje wejście...";
@@ -87,7 +85,7 @@ function generateID(){
          Math.floor(1000+Math.random()*9000) + "-2026";
 }
 
-/* ANALYSIS */
+/* ANALIZA */
 function analyze(){
 
   let score =
@@ -105,7 +103,7 @@ function analyze(){
   loadingSequence();
 }
 
-/* LOADING FIX */
+/* LOADING */
 function loadingSequence(){
 
   const texts = [
@@ -155,7 +153,7 @@ function intervention(){
   generateDocs();
 }
 
-/* AKTA */
+/* AKTA — FIX (NAJWAŻNIEJSZE) */
 function generateDocs(){
 
   const name = document.getElementById("name").value;
@@ -163,33 +161,42 @@ function generateDocs(){
   const age = document.getElementById("age").value;
   const role = document.getElementById("role").value;
 
-  fileHTML = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>AKTA</title>
-<style>
-body{font-family:Courier;background:#f3f0df;padding:40px;}
-.stamp{border:3px solid darkred;color:darkred;padding:10px;display:inline-block;transform:rotate(-6deg);}
-</style>
-<body>
+  userID = userID || generateID();
 
-<h2>BACKROOMS INSTITUTE // FILE</h2>
-<div class="stamp">RECOVERED FILE</div>
+  const quotes = [
+    "Jednostka wykazuje adaptację do niestabilnych struktur rzeczywistości.",
+    "Obserwacje wskazują na brak pełnej zgodności percepcyjnej.",
+    "Podmiot reaguje spokojem na anomalie środowiskowe.",
+    "Wykryto tendencję do akceptacji systemów nieznanego pochodzenia.",
+    "Profil zgodny z ekspozycją na Level 0."
+  ];
 
-<p>ID: ${userID}</p>
-<p>IMIĘ: ${name}</p>
-<p>NAZWISKO: ${surname}</p>
-<p>WIEK: ${age}</p>
-<p>FUNKCJA: ${role}</p>
-<p>STATUS: ${status}</p>
+  const quote = quotes[Math.floor(Math.random()*quotes.length)];
 
-<p>RECOMMENDATION: CONTINUOUS OBSERVATION</p>
+  const paper = document.getElementById("paper");
 
-</body>
-</html>
-`;
+  paper.innerHTML = `
+    <div class="stamp">RECOVERED FILE</div>
+    <div class="stamp2">BACKROOMS INSTITUTE VERIFIED</div>
+
+    <h3>AKTA REKRUTA</h3>
+
+    <p><b>ID:</b> ${userID}</p>
+    <p><b>IMIĘ:</b> ${name}</p>
+    <p><b>NAZWISKO:</b> ${surname}</p>
+    <p><b>WIEK:</b> ${age}</p>
+    <p><b>FUNKCJA:</b> ${role}</p>
+    <p><b>STATUS:</b> ${status}</p>
+
+    <hr>
+
+    <p><b>CYTAT SYSTEMOWY:</b></p>
+    <p><i>"${quote}"</i></p>
+
+    <p><b>REKOMENDACJA:</b> CONTINUOUS OBSERVATION</p>
+  `;
+
+  fileHTML = paper.innerHTML;
 }
 
 /* DOWNLOAD */
