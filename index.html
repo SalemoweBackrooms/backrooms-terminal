@@ -37,9 +37,9 @@
   <input id="age" placeholder="Wiek">
   <input id="role" placeholder="Dom / Funkcja">
 
-  <label><input type="checkbox"> Zgoda na obserwację</label><br>
-  <label><input type="checkbox"> Zgoda na analizę</label><br>
-  <label><input type="checkbox"> Akceptacja niestabilności</label><br>
+  <div class="checkbox-line"><input type="checkbox"><span>Zgoda na obserwację</span></div>
+  <div class="checkbox-line"><input type="checkbox"><span>Zgoda na analizę</span></div>
+  <div class="checkbox-line"><input type="checkbox"><span>Akceptacja niestabilności rzeczywistości</span></div>
 
   <button onclick="next('quiz')">DALEJ</button>
 </section>
@@ -70,6 +70,10 @@
 <section id="loading" class="screen">
   <h2>PROCESSING NODE 0...</h2>
   <p id="loadingText"></p>
+
+  <div id="loadingBar">
+    <div id="loadingFill"></div>
+  </div>
 </section>
 
 <!-- INTERVENTION -->
