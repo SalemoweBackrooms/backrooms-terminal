@@ -8,9 +8,9 @@
 <style>
 body{
     margin:0;
-    background:#000;
+    background:black;
     color:#00ff66;
-    font-family:Courier New, monospace;
+    font-family:Courier New;
     height:100vh;
     display:flex;
     justify-content:center;
@@ -18,37 +18,42 @@ body{
     overflow:hidden;
 }
 
-/* scanlines */
-body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0,255,102,0.03),
-        rgba(0,255,102,0.03) 1px,
-        transparent 1px,
-        transparent 3px
-    );
-    pointer-events:none;
+/* SCREEN SYSTEM */
+.screen{
+    display:none;
+    width:90%;
+    max-width:1000px;
 }
 
-.screen{width:90%;max-width:900px;}
-.line{white-space:pre;font-size:15px;line-height:1.6;}
+.active{
+    display:block;
+}
 
-.glitch{text-shadow:2px 0 red,-2px 0 blue;}
+.line{
+    white-space:pre;
+    font-size:15px;
+    line-height:1.6;
+}
 
+.glitch{
+    text-shadow:2px 0 red,-2px 0 blue;
+}
+
+/* BUTTON */
 button{
     margin-top:20px;
     background:black;
     color:#00ff66;
     border:1px solid #00ff66;
-    padding:10px 15px;
+    padding:10px;
     cursor:pointer;
 }
+button:hover{
+    background:#00ff66;
+    color:black;
+}
 
-button:hover{background:#00ff66;color:black;}
-
+/* INPUT */
 input{
     background:black;
     border:1px solid #00ff66;
@@ -56,161 +61,245 @@ input{
     padding:6px;
 }
 
-/* ekrany */
-#form,#loading,#doc{display:none;}
+/* LOADING */
+.bar{
+    width:100%;
+    height:20px;
+    border:1px solid #00ff66;
+    margin-top:15px;
+}
+.fill{
+    height:100%;
+    width:0%;
+    background:#00ff66;
+}
 
-/* loading bar */
-.bar{width:100%;height:20px;border:1px solid #00ff66;margin-top:20px;}
-.fill{height:100%;width:0%;background:#00ff66;}
-
+/* STAMP */
 .stamp{
     position:absolute;
     top:120px;
-    right:60px;
+    right:80px;
     border:4px solid red;
     color:red;
     padding:10px;
     transform:rotate(-10deg);
     opacity:0;
+    font-weight:bold;
+}
+
+/* GLITCH OVERLAY */
+#glitchOverlay{
+    position:fixed;
+    inset:0;
+    background:black;
+    color:#00ff66;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:20px;
+    letter-spacing:2px;
+    opacity:0;
+    pointer-events:none;
+    z-index:9999;
 }
 </style>
 </head>
 
 <body>
 
-<div class="screen">
+<!-- GLITCH OVERLAY -->
+<div id="glitchOverlay">SYSTEM ERROR</div>
 
 <!-- TERMINAL -->
-<div id="terminal">
-<div class="line glitch">BACKROOMS SYSTEM</div>
+<div id="terminal" class="screen active">
+<div class="line glitch">BACKROOMS SYSTEM v3</div>
 <br>
 <div class="line">Łączenie z Level 0...</div>
-<div class="line">[OK] stabilne</div>
-<div class="line">STATUS: OCZEKIWANIE</div>
-
-<button id="start">WEJDŹ</button>
+<div class="line">STATUS: OCZEKIWANIE NA REKRUTA</div>
+<br>
+<button onclick="startRecruit()">WEJDŹ DO SYSTEMU</button>
 </div>
 
-<!-- FORM -->
-<div id="form">
-<div class="line glitch">REJESTRACJA</div>
+<!-- RECRUIT -->
+<div id="recruit" class="screen">
+<div class="line glitch">REJESTRACJA REKRUTA</div>
 <br>
 
 <input id="name" placeholder="Imię i nazwisko">
 <br><br>
 
-<button id="send">ZATWIERDŹ</button>
+<button onclick="submitRecruit()">ZATWIERDŹ</button>
 
+<br><br>
 <div id="result"></div>
 </div>
 
 <!-- LOADING -->
-<div id="loading">
-<div class="line glitch">PRZETWARZANIE...</div>
+<div id="loading" class="screen">
+<div class="line glitch">PRZETWARZANIE AKT...</div>
 <br>
 
-<div class="line" id="loadingText">start...</div>
-<div class="bar"><div class="fill" id="fill"></div></div>
+<div class="line" id="loadingText">inicjalizacja...</div>
+
+<div class="bar"><div class="fill" id="bar"></div></div>
 </div>
 
-<!-- DOC -->
-<div id="doc">
+<!-- STAMP -->
+<div id="stampScreen" class="screen">
 
 <div class="stamp" id="stamp">ZAAKCEPTOWANO</div>
 
-<div class="line glitch">AKTA REKRUTA</div>
+<div class="line glitch">SYSTEM REKRUTACYJNY</div>
 <br>
 
-<div id="final"></div>
+<div id="systemInfo"></div>
 
+<br>
+<div class="line">PRZEKIEROWANIE DO KWESTIONARIUSZA...</div>
 </div>
+
+<!-- QUESTIONNAIRE -->
+<div id="questionnaire" class="screen">
+
+<div class="line glitch">FORMULARZ PRZYJĘCIA PERSONELU</div>
+<br>
+
+<div class="line">Imię i nazwisko:</div>
+<div class="line">________________________</div>
+<br>
+
+<div class="line">Dom / Frakcja:</div>
+<div class="line">________________________</div>
+<br>
+
+<div class="line">Rok szkolenia:</div>
+<div class="line">________________________</div>
+<br>
+
+<div class="line">☐ Akceptuję procedury</div>
+<div class="line">☐ Akceptuję anomalie</div>
+<div class="line">☐ Rozumiem ryzyko</div>
 
 </div>
 
 <script>
 
-let name = "";
-let id = 0;
-let userInteracted = false;
+let name="";
+let id=0;
+
+/* SCREEN SWITCH */
+function show(screen){
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    document.getElementById(screen).classList.add("active");
+}
+
+/* GLITCH TRANSITION */
+function glitchTransition(callback){
+
+    const overlay = document.getElementById("glitchOverlay");
+
+    let msgs = [
+        "SYSTEM ERROR",
+        "REALIGNING",
+        "ANOMALY DETECTED",
+        "REBUILDING",
+        "/// GLITCH ///"
+    ];
+
+    let i = 0;
+
+    overlay.style.opacity = 1;
+
+    let interval = setInterval(()=>{
+        overlay.innerText = msgs[i++] || "/// GLITCH ///";
+    },120);
+
+    setTimeout(()=>{
+        clearInterval(interval);
+        overlay.style.opacity = 0;
+        callback();
+    },900);
+}
 
 /* START */
-document.getElementById("start").onclick = () => {
-    userInteracted = true;
-    document.getElementById("terminal").style.display="none";
-    document.getElementById("form").style.display="block";
-};
+function startRecruit(){
+    glitchTransition(()=>show("recruit"));
+}
 
 /* ID */
-function gen(){
+function genID(){
     return Math.floor(100000 + Math.random()*900000);
 }
 
 /* SUBMIT */
-document.getElementById("send").onclick = () => {
+function submitRecruit(){
 
     name = document.getElementById("name").value;
-
     if(!name) return alert("Brak danych");
 
-    id = gen();
+    id = genID();
 
     document.getElementById("result").innerHTML =
         `<div class="line glitch">SUKCES</div>
-         <div class="line">${name}</div>
+         <div class="line">REKRUT: ${name}</div>
          <div class="line">ID: ${id}</div>`;
 
     startLoading();
-};
+}
 
 /* LOADING */
 function startLoading(){
 
-    document.getElementById("form").style.display="none";
-    document.getElementById("loading").style.display="block";
+    show("loading");
 
-    let bar = document.getElementById("fill");
-    let txt = document.getElementById("loadingText");
+    let bar=document.getElementById("bar");
+    let txt=document.getElementById("loadingText");
 
-    let p = 0;
+    let p=0;
+    let msgs=[
+        "tworzenie akt...",
+        "analiza tożsamości...",
+        "przydzielanie ID...",
+        "weryfikacja anomalii..."
+    ];
+    let i=0;
 
-    let msgs = ["analiza...", "skan...", "archiwum...", "tworzenie profilu..."];
-    let i = 0;
+    let int=setInterval(()=>{
 
-    let int = setInterval(()=>{
+        p+=5;
+        bar.style.width=p+"%";
 
-        p += 5;
-        bar.style.width = p + "%";
-
-        if(p % 25 === 0){
-            txt.innerText = msgs[i++] || "finalizacja...";
+        if(p%25===0){
+            txt.innerText=msgs[i++]||"finalizacja...";
         }
 
-        if(p >= 100){
+        if(p>=100){
             clearInterval(int);
-            showDoc();
+            showStamp();
         }
 
     },80);
 }
 
-/* DOC */
-function showDoc(){
+/* STAMP */
+function showStamp(){
 
-    document.getElementById("loading").style.display="none";
-    document.getElementById("doc").style.display="block";
-
-    document.getElementById("final").innerHTML =
-        `REKRUT: ${name}<br>ID SYSTEMOWE: ${id}`;
+    glitchTransition(()=>show("stampScreen"));
 
     setTimeout(()=>{
         document.getElementById("stamp").style.opacity=1;
-    },600);
+    },1200);
 
-    /* DŹWIĘK (DZIAŁA TYLKO PO INTERAKCJI) */
-    if(userInteracted){
-        let audio = new Audio("https://actions.google.com/sounds/v1/office/printer.ogg");
-        audio.play().catch(()=>{});
-    }
+    setTimeout(()=>{
+        document.getElementById("systemInfo").innerHTML =
+            `<div class="line">REKRUT: ${name}</div>
+             <div class="line">ID: ${id}</div>
+             <div class="line">STATUS: PRZYJĘTY</div>`;
+    },500);
+
+    setTimeout(()=>{
+        glitchTransition(()=>show("questionnaire"));
+    },3000);
 }
 
 </script>
