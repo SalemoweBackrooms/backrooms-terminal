@@ -1,109 +1,151 @@
-const hum = document.getElementById("hum");
-const activity = document.getElementById("activity");
-const glitch = document.getElementById("glitch");
+let audioOn = false;
 
-let data = {};
+function toggleAudio(){
+  audioOn = !audioOn;
 
-function boot() {
-  const text = [
-    "[SYSTEM INSTYTUTU]",
-    "łączenie z warstwą BACKROOMS...",
-    "analiza struktury...",
-    "ładowanie NADZORCY...",
-    "WEJŚCIE ZAAKCEPTOWANE"
-  ];
+  document.getElementById("audioToggle").innerText =
+    audioOn ? "AUDIO: ON" : "AUDIO: OFF";
 
-  let i = 0;
-  const el = document.getElementById("bootText");
-
-  const interval = setInterval(() => {
-    el.innerHTML += text[i] + "<br>";
-    if(i === 2) playGlitch();
-    i++;
-
-    if(i >= text.length){
-      clearInterval(interval);
-      document.getElementById("boot").classList.add("hidden");
-      document.getElementById("terminal").classList.remove("hidden");
-
-      hum.volume = 0.05;
-      hum.loop = true;
-      hum.play();
-
-      nadzorca();
-    }
-  }, 900);
+  if(audioOn){
+    document.getElementById("hum").volume = 0.05;
+    document.getElementById("hum").play();
+  } else {
+    document.getElementById("hum").pause();
+  }
 }
 
-function nadzorca() {
-  document.getElementById("nadzorca").innerHTML =
-  "[NADZORCA]<br>System aktywny. Rozpocznij rejestrację.";
-}
+/* BOOT */
+window.onload = function(){
 
-function startForm() {
-  document.getElementById("terminal").classList.add("hidden");
+  setTimeout(()=>{
+    document.getElementById("boot").classList.add("hidden");
+    document.getElementById("nadzorcaBox").classList.remove("hidden");
+
+    document.getElementById("nadzorcaText").innerText =
+      "System aktywny. Rekrut oczekuje na inicjację.";
+  },2000);
+};
+
+/* FLOW */
+function startForm(){
+  document.getElementById("nadzorcaBox").classList.add("hidden");
   document.getElementById("form").classList.remove("hidden");
-  activity.play();
 }
 
-function submitForm() {
-  data.name = document.getElementById("name").value;
-  data.age = document.getElementById("age").value;
-  data.q1 = document.getElementById("q1").value;
-  data.q2 = document.getElementById("q2").value;
-  data.q3 = document.getElementById("q3").value;
-  data.q4 = document.getElementById("q4").value;
-
+function toQuestionnaire(){
   document.getElementById("form").classList.add("hidden");
-  document.getElementById("files").classList.remove("hidden");
-
-  generateFile();
+  document.getElementById("quiz").classList.remove("hidden");
 }
 
-function generateFile() {
-  let score = [data.q1,data.q2,data.q3,data.q4].filter(x=>x==="TAK").length;
+function analyze(){
+
+  let score = 0;
+
+  ["q1","q2","q3","q4"].forEach(id=>{
+    if(document.getElementById(id).value === "TAK") score++;
+  });
 
   let status =
     score >= 3 ? "ANOMALIA"
     : score === 2 ? "NIESTABILNY"
     : "STABILNY";
 
-  document.getElementById("file").innerHTML =
-`
-ID: INST-${Math.floor(Math.random()*99999)}<br>
-IMIĘ: ${data.name}<br>
-WIEK: ${data.age}<br>
-STATUS: ${status}<br><br>
+  document.getElementById("quiz").classList.add("hidden");
+  document.getElementById("analysis").classList.remove("hidden");
 
-[ANALIZA NADZORCY]<br>
-Poziom zgodności: ${score}/4<br>
-Status psychiczny: ${status}<br><br>
+  document.getElementById("analysisText").innerText =
+    "Status: " + status;
 
-Podmiot objęty stałą obserwacją Instytutu.
+  setTimeout(()=>{
+    generateFile(status);
+  },2000);
+}
+
+/* AKTA HTML */
+function generateFile(status){
+
+  let name = document.getElementById("name").value;
+  let surname = document.getElementById("surname").value;
+  let age = document.getElementById("age").value;
+  let role = document.getElementById("role").value;
+
+  let html = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AKTA INSTYTUTU</title>
+
+<style>
+body{
+  background: repeating-linear-gradient(0deg,#1c1c1c,#1c1c1c 2px,#222 4px);
+  font-family:Courier New;
+  padding:40px;
+}
+
+.doc{
+  background:#f3f0df;
+  padding:30px;
+  border:3px solid black;
+  max-width:900px;
+  margin:auto;
+}
+
+.warning{
+  border-left:8px solid darkred;
+  background:#fff1d6;
+  padding:10px;
+}
+
+.top{
+  background:black;
+  color:white;
+  padding:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="doc">
+
+<div class="top">BACKROOMS INSTITUTE // ARCHIVE NODE</div>
+
+<h2>AKTA REKRUTA</h2>
+
+<div class="warning">
+RECOVERED FILE // PARTIAL INTEGRITY
+</div>
+
+<p><b>IMIĘ:</b> ${name}</p>
+<p><b>NAZWISKO:</b> ${surname}</p>
+<p><b>WIEK:</b> ${age}</p>
+<p><b>DOM/FUNKCJA:</b> ${role}</p>
+
+<p><b>STATUS:</b> ${status}</p>
+
+<div class="warning">
+REKOMENDACJA: STAŁA OBSERWACJA
+</div>
+
+<p>SYSTEM: jednostka zakwalifikowana do monitoringu Instytutu.</p>
+
+</div>
+
+</body>
+</html>
 `;
 
-  playGlitch();
+  document.getElementById("files").classList.remove("hidden");
+  document.getElementById("document").innerText = html;
+  window.generatedFile = html;
 }
 
-function downloadFile() {
-  const content = document.getElementById("file").innerText;
-  const blob = new Blob([content], {type:"text/plain"});
-  const a = document.createElement("a");
-
+/* DOWNLOAD */
+function downloadFile(){
+  let blob = new Blob([window.generatedFile], {type:"text/html"});
+  let a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "AKTA_INSTYTUTU.txt";
+  a.download = "AKTA_INSTYTUTU.html";
   a.click();
 }
-
-function playGlitch(){
-  glitch.currentTime = 0;
-  glitch.play();
-  document.body.classList.add("glitch");
-  setTimeout(()=>document.body.classList.remove("glitch"),300);
-}
-
-document.body.addEventListener("click", ()=>{
-  hum.play();
-}, {once:true});
-
-window.onload = boot;
