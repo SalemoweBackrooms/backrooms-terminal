@@ -1,30 +1,37 @@
-body {
-  margin:0;
+body{
   background:black;
   color:#00ff9d;
   font-family: monospace;
-}
-
-.hidden { display:none; }
-
-#boot, #terminal, #form, #files {
+  margin:0;
   padding:20px;
 }
 
-input, select, button {
+.hidden{ display:none; }
+
+button{
   background:black;
   border:1px solid #00ff9d;
   color:#00ff9d;
-  padding:6px;
-  margin:5px 0;
+  padding:8px;
+  margin:5px;
 }
 
-.glitch {
-  animation: flicker 0.2s infinite;
+input, select{
+  background:black;
+  border:1px solid #00ff9d;
+  color:#00ff9d;
+  margin:5px;
+  padding:5px;
 }
 
-@keyframes flicker {
-  0% {opacity:1;}
-  50% {opacity:0.3;}
-  100% {opacity:1;}
+.terminal{
+  padding:20px;
+  border:1px solid #00ff9d;
+}
+
+#document{
+  background:
+    repeating-linear-gradient(0deg,#1c1c1c,#1c1c1c 2px,#222 4px);
+  padding:20px;
+  color:black;
 }
