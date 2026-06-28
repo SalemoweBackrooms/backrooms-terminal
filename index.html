@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BACKROOMS SYSTEM v7</title>
+<title>INSTYTUT BACKROOMS — SYSTEM REKRUTACJI</title>
 
 <style>
 body{
@@ -67,34 +67,37 @@ input{
     padding:10px;
     transform:rotate(-10deg);
     opacity:0;
+    font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
-<div id="glitchOverlay">SYSTEM ERROR</div>
+<div id="glitchOverlay">SYSTEM INITIALIZATION ERROR</div>
 
 <!-- TERMINAL -->
 <div id="terminal" class="screen active">
-<div class="line glitch">BACKROOMS SYSTEM v7</div>
+<div class="line glitch">INSTYTUT EKSPLOATACJI ANOMALII — SYSTEM REKRUTACYJNY</div>
 <br>
-<div class="line">Łączenie z systemem...</div>
-<button onclick="start()">WEJDŹ</button>
+<div class="line">Łączenie z archiwum centralnym...</div>
+<div class="line">Status: oczekiwanie na jednostkę rekrutacyjną</div>
+<button onclick="start()">WEJDŹ DO SYSTEMU</button>
 </div>
 
 <!-- RECRUIT -->
 <div id="recruit" class="screen">
-<div class="line glitch">REJESTRACJA</div>
-<input id="name">
+<div class="line glitch">REJESTRACJA REKRUTA</div>
+<br>
+<input id="name" placeholder="Imię i nazwisko">
 <br><br>
-<button onclick="submitRecruit()">OK</button>
+<button onclick="submitRecruit()">ZATWIERDŹ REJESTRACJĘ</button>
 <div id="result"></div>
 </div>
 
 <!-- LOADING -->
 <div id="loading" class="screen">
-<div class="line glitch">PRZETWARZANIE...</div>
+<div class="line glitch">TWORZENIE AKT PERSONALNYCH...</div>
 <div class="bar"><div class="fill" id="bar"></div></div>
 </div>
 
@@ -106,17 +109,34 @@ input{
 
 <!-- FORM -->
 <div id="form" class="screen">
-<div class="line glitch">KWESTIONARIUSZ</div>
+<div class="line glitch">FORMULARZ AKT PERSONALNYCH</div>
 
-<input id="q_name" placeholder="Imię"><br><br>
-<input id="q_house" placeholder="Dom"><br><br>
-<input id="q_year" placeholder="Rok"><br><br>
+<br>
 
-<label><input type="checkbox" id="c1"> procedury</label><br>
-<label><input type="checkbox" id="c2"> anomalie</label><br>
-<label><input type="checkbox" id="c3"> ryzyko</label><br>
+<div class="line">DANE PERSONELU</div>
+<input id="q_name" placeholder="Imię i nazwisko"><br><br>
+<input id="q_house" placeholder="Dom / Frakcja"><br><br>
+<input id="q_year" placeholder="Rok szkolenia"><br><br>
 
-<button onclick="submitForm()">ZATWIERDŹ</button>
+<br>
+
+<div class="line">ZGODNOŚĆ OPERACYJNA</div>
+
+<label><input type="checkbox" id="c1"> Będę wykonywać polecenia kadry nadzorującej</label><br>
+<label><input type="checkbox" id="c2"> Zgłaszam wszystkie anomalie i nieprawidłowości</label><br>
+<label><input type="checkbox" id="c3"> Przyjmuję ryzyko operacyjne</label><br>
+
+<br>
+
+<div class="line">WSTĘPNA OCENA</div>
+
+<label><input type="checkbox"> Czy zdarzyło Ci się zgubić w znanym miejscu</label><br>
+<label><input type="checkbox"> Czy słyszałeś dźwięki bez źródła</label><br>
+<label><input type="checkbox"> Czy ufasz rzeczywistości</label><br>
+
+<br>
+
+<button onclick="submitForm()">GENERUJ AKTA</button>
 
 <br><br>
 <div id="out"></div>
@@ -129,29 +149,29 @@ let id=0;
 let recruits=JSON.parse(localStorage.getItem("recruits")||"[]");
 let outcome="neutral";
 
-/* NPC SYSTEM */
-let npcLines=[
-"// NADZORCA: obserwacja rozpoczęta",
-"// NADZORCA: analiza rekruta...",
-"// NADZORCA: dane niestabilne",
-"// NADZORCA: wszystko jest monitorowane",
-"// NADZORCA: nie ufaj odpowiedziom"
-];
+/* NADZORCA — bardziej instytutowy */
+function npcMessage(type){
 
-/* SCREEN */
+if(type==="accepted") return "RAPORT NADZORCY: jednostka zakwalifikowana do dalszego przetwarzania.";
+if(type==="rejected") return "RAPORT NADZORCY: jednostka odrzucona — brak zgodności strukturalnej.";
+if(type==="anomaly") return "RAPORT NADZORCY: wykryto niestabilność danych operacyjnych.";
+if(type==="secret") return "RAPORT NADZORCY: brak możliwości klasyfikacji jednostki.";
+
+return "RAPORT NADZORCY: monitoring aktywny.";
+}
+
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* GLITCH */
 function glitch(cb){
 let o=document.getElementById("glitchOverlay");
-let t=["ERROR","CORRUPT","REALIGN","///","SYSTEM"];
+let t=["INITIALIZING","ANALYSIS","CORRUPTION CHECK","///","SYNC"];
 let i=0;
 o.style.opacity=1;
 let int=setInterval(()=>o.innerText=t[i++]||"///",120);
-setTimeout(()=>{clearInterval(int);o.style.opacity=0;cb();},800);
+setTimeout(()=>{clearInterval(int);o.style.opacity=0;cb();},900);
 }
 
 function start(){glitch(()=>show("recruit"));}
@@ -160,10 +180,9 @@ function genID(){
 return Math.floor(100000+Math.random()*900000);
 }
 
-/* RECRUIT */
 function submitRecruit(){
 name=document.getElementById("name").value;
-if(!name) return alert("Brak danych");
+if(!name) return alert("Brak danych identyfikacyjnych");
 id=genID();
 startLoading();
 }
@@ -188,22 +207,10 @@ show("stampScreen");
 document.getElementById("stamp").style.opacity=1;
 document.getElementById("info").innerHTML=
 `REKRUT: ${name}<br>ID: ${id}`;
-setTimeout(()=>glitch(()=>show("form")),2000);
+setTimeout(()=>glitch(()=>show("form")),1800);
 });
 }
 
-/* NPC MESSAGE */
-function npcMessage(type){
-
-if(type==="accepted") return "NADZORCA: rekrut zaakceptowany.";
-if(type==="rejected") return "NADZORCA: brak kompatybilności.";
-if(type==="anomaly") return "NADZORCA: wykryto anomalię danych.";
-if(type==="secret") return "NADZORCA: ...to nie powinno istnieć.";
-
-return "NADZORCA: obserwacja aktywna.";
-}
-
-/* FORM */
 function submitForm(){
 
 let qn=document.getElementById("q_name").value;
@@ -214,49 +221,30 @@ let c1=document.getElementById("c1").checked;
 let c2=document.getElementById("c2").checked;
 let c3=document.getElementById("c3").checked;
 
-/* DEFAULT */
+/* LOGIKA */
 outcome="accepted";
 
-/* REJECT */
-if(!qn||!h||!y){
-outcome="rejected";
-}
-
-/* RANDOM ANOMALY */
-if(Math.random()<0.2){
-outcome="anomaly";
-}
-
-/* SECRET PATH */
-if(c1&&c2&&c3){
-outcome="secret";
-}
-
-/* EASTER */
-if(qn.toLowerCase().includes("null")){
-outcome="secret";
-}
+if(!qn||!h||!y) outcome="rejected";
+if(Math.random()<0.18) outcome="anomaly";
+if(c1&&c2&&c3) outcome="secret";
+if(qn.toLowerCase().includes("null")) outcome="secret";
 
 /* SAVE */
 recruits.push({qn,h,y,c1,c2,c3,id,outcome});
 localStorage.setItem("recruits",JSON.stringify(recruits));
 
-/* NPC OUTPUT */
+/* OUTPUT */
 document.getElementById("out").innerHTML=
 `<div class="line glitch">${npcMessage(outcome)}</div>`;
 
-/* RANDOM NPC OBSERVATION */
-setTimeout(()=>{
-document.getElementById("out").innerHTML+=
-`<div class="line">${npcLines[Math.floor(Math.random()*npcLines.length)]}</div>`;
-},800);
+/* === DOKUMENT INSTYTUTU === */
 
-/* DOCUMENT */
-let bg="#000",col="#00ff66";
+let bg="#f8f5e6";
+let col="#000";
 
-if(outcome==="rejected"){bg="#200";col="#ff4444";}
-if(outcome==="anomaly"){bg="#111";col="#ffaa00";}
-if(outcome==="secret"){bg="#000033";col="#66f";}
+if(outcome==="rejected"){bg="#2a0000";col="#ff4444";}
+if(outcome==="anomaly"){bg="#1a1a1a";col="#ffb300";}
+if(outcome==="secret"){bg="#0a0a2a";col="#66aaff";}
 
 let doc=`
 <html>
@@ -265,33 +253,57 @@ let doc=`
 body{
 background:${bg};
 color:${col};
-font-family:Courier New;
+font-family:Arial;
 padding:40px;
 }
-.box{border:1px solid ${col};padding:20px;}
-h1{text-shadow:2px 0 red,-2px 0 blue;}
-.npc{color:#888;font-style:italic;}
+.document{
+max-width:900px;
+margin:auto;
+border:4px solid #000;
+background:rgba(255,255,255,0.85);
+padding:30px;
+}
+.section{
+margin:15px 0;
+padding:10px;
+border-bottom:1px solid #000;
+}
+.title{
+font-weight:bold;
+font-size:20px;
+margin-bottom:20px;
+}
+.stamp{
+color:red;
+font-weight:bold;
+font-size:22px;
+transform:rotate(-5deg);
+display:inline-block;
+}
 </style>
 </head>
 <body>
 
-<h1>AKTA REKRUTA</h1>
+<div class="document">
 
-<div class="box">
-REKRUT: ${qn}<br>
-DOM: ${h}<br>
-ROK: ${y}<br><br>
+<div class="title">INSTYTUT EKSPLOATACJI ANOMALII — AKTA REKRUTA</div>
 
-ID: ${id}<br>
-OUTCOME: ${outcome}<br><br>
+<div class="section">DANE PERSONELU:<br>
+${qn}<br>${h}<br>${y}</div>
 
-PROCEDURY: ${c1}<br>
-ANOMALIE: ${c2}<br>
-RYZYKO: ${c3}<br>
+<div class="section">IDENTYFIKATOR:<br>${id}</div>
+
+<div class="section">STATUS SYSTEMOWY:<br>${outcome}</div>
+
+<div class="section">ZGODNOŚĆ OPERACYJNA:<br>
+procedury: ${c1}<br>
+anomalie: ${c2}<br>
+ryzyko: ${c3}</div>
+
+<div class="section stamp">
+${npcMessage(outcome)}
 </div>
 
-<div class="npc">
-${npcMessage(outcome)}
 </div>
 
 </body>
