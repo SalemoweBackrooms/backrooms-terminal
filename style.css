@@ -1,0 +1,30 @@
+body {
+  margin:0;
+  background:black;
+  color:#00ff9d;
+  font-family: monospace;
+}
+
+.hidden { display:none; }
+
+#boot, #terminal, #form, #files {
+  padding:20px;
+}
+
+input, select, button {
+  background:black;
+  border:1px solid #00ff9d;
+  color:#00ff9d;
+  padding:6px;
+  margin:5px 0;
+}
+
+.glitch {
+  animation: flicker 0.2s infinite;
+}
+
+@keyframes flicker {
+  0% {opacity:1;}
+  50% {opacity:0.3;}
+  100% {opacity:1;}
+}
