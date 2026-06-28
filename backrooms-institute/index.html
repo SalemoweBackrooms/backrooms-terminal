@@ -2,68 +2,34 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>INSTITUTE // BACKROOMS ACCESS NODE</title>
+<title>BACKROOMS TERMINAL</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- AUDIO -->
-<audio id="hum" src="audio/hum.mp3" loop></audio>
-<audio id="activity" src="audio/activity.mp3"></audio>
-<audio id="glitch" src="audio/glitch.mp3"></audio>
+<h1>BACKROOMS TERMINAL</h1>
 
-<!-- BOOT -->
-<div id="boot">
-  <div id="bootText"></div>
-</div>
+<div id="boot">ŁADOWANIE SYSTEMU...</div>
 
-<!-- TERMINAL -->
-<div id="terminal" class="hidden">
-  <div id="nadzorca"></div>
+<div id="app" class="hidden">
+
+  <h2>NADZORCA</h2>
+  <p id="nadzorca"></p>
+
   <button onclick="startForm()">ROZPOCZNIJ REJESTRACJĘ</button>
-</div>
 
-<!-- FORMULARZ -->
-<div id="form" class="hidden">
-  <h2>KWESTIONARIUSZ REKRUTACYJNY</h2>
+  <div id="form" class="hidden">
+    <h3>KWESTIONARIUSZ</h3>
 
-  <input id="name" placeholder="Imię">
-  <input id="age" placeholder="Wiek">
+    <input id="name" placeholder="Imię">
+    <input id="age" placeholder="Wiek">
 
-  <p>Czy słyszysz dźwięki w pustych przestrzeniach?</p>
-  <select id="q1">
-    <option>TAK</option>
-    <option>NIE</option>
-  </select>
+    <button onclick="submitForm()">WYŚLIJ</button>
+  </div>
 
-  <p>Czy akceptujesz obserwację?</p>
-  <select id="q2">
-    <option>TAK</option>
-    <option>NIE</option>
-  </select>
+  <div id="result" class="hidden"></div>
 
-  <p>Czy miałeś kontakt z nieciągłością?</p>
-  <select id="q3">
-    <option>TAK</option>
-    <option>NIE</option>
-  </select>
-
-  <p>Czy pamiętasz wszystkie sny?</p>
-  <select id="q4">
-    <option>TAK</option>
-    <option>NIE</option>
-  </select>
-
-  <button onclick="submitForm()">PRZEŚLIJ DANE</button>
-</div>
-
-<!-- AKTA -->
-<div id="files" class="hidden">
-  <h2>AKTA REKRUTA</h2>
-  <div id="file"></div>
-
-  <button onclick="downloadFile()">POBIERZ DOKUMENT</button>
 </div>
 
 <script src="script.js"></script>
