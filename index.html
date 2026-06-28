@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BACKROOMS TERMINAL</title>
+<title>BACKROOMS SYSTEM</title>
 
 <style>
 body{
@@ -11,24 +11,31 @@ body{
     background:#000;
     color:#00ff66;
     font-family:Courier New, monospace;
+    height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
 }
 
-.terminal{
+/* ekran */
+.screen{
     width:90%;
     max-width:900px;
-    padding:20px;
 }
 
+/* tekst terminala */
 .line{
     white-space:pre;
     font-size:15px;
     line-height:1.6;
 }
 
+/* glitch */
+.glitch{
+    text-shadow:1px 0 red, -1px 0 blue;
+}
+
+/* kursor */
 .cursor{
     display:inline-block;
     width:10px;
@@ -41,36 +48,105 @@ body{
     51%,100%{opacity:0;}
 }
 
-.glitch{
+/* przycisk */
+button{
+    margin-top:20px;
+    background:black;
     color:#00ff66;
-    text-shadow:
-        1px 0 red,
-        -1px 0 blue;
+    border:1px solid #00ff66;
+    padding:10px 15px;
+    font-family:Courier New, monospace;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#00ff66;
+    color:black;
+}
+
+/* formularz */
+#form{
+    display:none;
+}
+input{
+    background:black;
+    border:1px solid #00ff66;
+    color:#00ff66;
+    padding:5px;
+    margin-top:5px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="terminal">
+<div class="screen">
 
-<div class="line glitch">BACKROOMS EXPLORATION DIVISION SYSTEM</div>
+<!-- 🔥 START TERMINAL -->
+<div id="terminal">
+
+<div class="line glitch">BACKROOMS EXPLORATION SYSTEM</div>
 <br>
 
-<div class="line">Łączenie z węzłem Level 0...</div>
+<div class="line">Łączenie z Level 0...</div>
 <div class="line">[OK] Połączenie stabilne</div>
-<div class="line">[OK] Dostęp lokalny przyznany</div>
-<div class="line">[!] Wykryto niestabilność przestrzenną</div>
+<div class="line">[OK] Dostęp przyznany</div>
+<div class="line">[!] Wykryto anomalie przestrzenne</div>
+
 <br>
 
-<div class="line">WPROWADŹ IDENTYFIKATOR REKRUTA:</div>
-<div class="line">> <span class="cursor"></span></div>
+<div class="line">STATUS: OCZEKIWANIE NA REKRUTA</div>
+<br>
+
+<div class="line">Naciśnij ENTER lub kliknij aby kontynuować</div>
+
+<button id="startBtn">[ WEJDŹ DO SYSTEMU ]</button>
+
+</div>
+
+<!-- 🧠 FORMULARZ -->
+<div id="form">
+
+<div class="line glitch">REJESTRACJA REKRUTA</div>
+<br>
+
+<label>ID REKRUTA:</label><br>
+<input type="text"><br><br>
+
+<label>POZIOM DOSTĘPU:</label><br>
+<input type="text"><br><br>
+
+<label>STATUS PSYCHICZNY:</label><br>
+<input type="text"><br><br>
+
+<button id="submitBtn">ZATWIERDŹ</button>
 
 <br><br>
 
-<div class="line">STATUS: OCZEKIWANIE...</div>
+<div class="line">SYSTEM: OCZEKUJE NA WERYFIKACJĘ...</div>
 
 </div>
+
+</div>
+
+<script>
+
+function startGame(){
+    document.getElementById("terminal").style.display = "none";
+    document.getElementById("form").style.display = "block";
+}
+
+/* klik */
+document.getElementById("startBtn").addEventListener("click", startGame);
+
+/* ENTER */
+document.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+        startGame();
+    }
+});
+
+</script>
 
 </body>
 </html>
