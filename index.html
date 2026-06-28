@@ -2,367 +2,53 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IEA // SYSTEM REKRUTACJI</title>
-
-<style>
-body{
-margin:0;
-background:black;
-color:#00ff66;
-font-family:Courier New, monospace;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-overflow:hidden;
-}
-
-.screen{display:none;width:90%;max-width:1000px;}
-.active{display:block;}
-
-.line{white-space:pre;font-size:15px;line-height:1.6;}
-.glitch{text-shadow:2px 0 red,-2px 0 blue;}
-
-button{
-margin-top:15px;
-background:black;
-color:#00ff66;
-border:1px solid #00ff66;
-padding:10px;
-cursor:pointer;
-}
-button:hover{background:#00ff66;color:black;}
-
-input{
-background:black;
-border:1px solid #00ff66;
-color:#00ff66;
-padding:6px;
-width:60%;
-}
-
-/* GLITCH */
-#glitchOverlay{
-position:fixed;
-inset:0;
-background:black;
-color:#00ff66;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:22px;
-opacity:0;
-pointer-events:none;
-z-index:9999;
-letter-spacing:2px;
-}
-
-/* AUDIO */
-#audioBtn{
-position:fixed;
-bottom:20px;
-right:20px;
-background:black;
-border:1px solid #00ff66;
-color:#00ff66;
-padding:8px;
-cursor:pointer;
-font-size:12px;
-}
-
-/* STAMP */
-.stamp{
-border:4px solid red;
-color:red;
-padding:10px;
-transform:rotate(-10deg);
-display:inline-block;
-font-weight:bold;
-opacity:0;
-}
-
-/* AKTA PODGLĄD */
-.documentPreview{
-background:#f3f0df;
-color:#000;
-padding:25px;
-margin-top:15px;
-border:3px solid #000;
-font-family:Courier New;
-position:relative;
-}
-
-/* watermark */
-.documentPreview::before{
-content:"INSTYTUT EKSPLOATACJI ANOMALII";
-position:absolute;
-top:40%;
-left:10%;
-font-size:40px;
-opacity:0.05;
-transform:rotate(-20deg);
-pointer-events:none;
-}
-
-/* scanlines */
-.documentPreview::after{
-content:"";
-position:absolute;
-inset:0;
-background:repeating-linear-gradient(
-0deg,
-rgba(0,0,0,0.05),
-rgba(0,0,0,0.05) 1px,
-transparent 3px
-);
-pointer-events:none;
-opacity:0.4;
-}
-</style>
+<title>INSTITUTE SYSTEM // BACKROOMS NODE</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div id="glitchOverlay">BŁĄD SYNCHRONIZACJI</div>
-<button id="audioBtn" onclick="toggleAudio()">AUDIO: OFF</button>
+<!-- 🔊 AUDIO -->
+<audio id="hum" src="audio/hum.mp3" loop></audio>
+<audio id="activity" src="audio/activity.mp3"></audio>
+<audio id="glitch" src="audio/glitch.mp3"></audio>
 
-<!-- TERMINAL -->
-<div id="terminal" class="screen active">
-<div class="line glitch">INSTYTUT EKSPLOATACJI ANOMALII</div>
-<div class="line">SYSTEM REKRUTACJI — POZIOM 0</div>
-<br>
-<div class="line">Łączenie z archiwum...</div>
-<button onclick="start()">WEJDŹ DO SYSTEMU</button>
+<!-- ⚡ BOOT -->
+<div id="boot-screen">
+  <div id="boot-text"></div>
 </div>
 
-<!-- REJESTRACJA -->
-<div id="recruit" class="screen">
-<div class="line glitch">REJESTRACJA REKRUTA</div>
-<br>
-<input id="name" placeholder="Imię i nazwisko">
-<br>
-<button onclick="submitRecruit()">ZATWIERDŹ</button>
-<div id="result"></div>
+<!-- 🧠 TERMINAL -->
+<div id="terminal" class="hidden">
+  <div id="nadzorca"></div>
+  <button onclick="startForm()">ROZPOCZNIJ REJESTRACJĘ</button>
 </div>
 
-<!-- LOADING -->
-<div id="loading" class="screen">
-<div class="line glitch">TWORZENIE AKT...</div>
+<!-- 🧾 FORMULARZ -->
+<div id="form" class="hidden">
+  <h2>KWESTIONARIUSZ INSTYTUTU</h2>
+
+  <label>Imię:</label>
+  <input id="name" type="text">
+
+  <label>Wiek:</label>
+  <input id="age" type="number">
+
+  <label>Akceptacja obserwacji:</label>
+  <select id="observe">
+    <option>TAK</option>
+    <option>NIE</option>
+  </select>
+
+  <button onclick="submitForm()">PRZEŚLIJ</button>
 </div>
 
-<!-- FORM -->
-<div id="form" class="screen">
-
-<div class="line glitch">KWESTIONARIUSZ — DANE WEJŚCIOWE</div>
-
-<br>
-
-<input id="q_name" placeholder="Imię i nazwisko"><br><br>
-<input id="q_house" placeholder="Dom / frakcja"><br><br>
-<input id="q_year" placeholder="Rok szkolenia"><br><br>
-
-<br>
-
-<div class="line">PYTANIA KORUPCYJNE //</div>
-
-<label><input type="checkbox" id="c1"> Czy słyszysz dźwięk tła bez źródła?</label><br>
-<label><input type="checkbox" id="c2"> Czy ufność w rzeczywistość jest stabilna?</label><br>
-<label><input type="checkbox" id="c3"> Czy widziałeś miejsca, które „zmieniają się”?</label><br>
-<label><input type="checkbox" id="c4"> Czy akceptujesz procedury instytutu?</label><br>
-
-<br>
-
-<button onclick="generateFiles()">GENERUJ AKTA</button>
-
-<div id="out"></div>
-
-<div id="preview"></div>
-
+<!-- 📄 AKTA -->
+<div id="files" class="hidden">
+  <h2>AKTA REKRUTA</h2>
+  <div id="file-content"></div>
 </div>
 
-<script>
-
-let name="";
-let id=0;
-let audioCtx;
-let noise;
-let gain;
-
-/* ================= AUDIO HUM BACKROOMS ================= */
-function toggleAudio(){
-if(audioCtx){
-audioCtx.close();
-audioCtx=null;
-document.getElementById("audioBtn").innerText="AUDIO: OFF";
-return;
-}
-
-audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-let bufferSize = 2 * audioCtx.sampleRate;
-let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-let data = buffer.getChannelData(0);
-
-for(let i=0;i<bufferSize;i++){
-data[i] = (Math.random()*2-1) * 0.6;
-}
-
-noise = audioCtx.createBufferSource();
-noise.buffer = buffer;
-noise.loop = true;
-
-gain = audioCtx.createGain();
-gain.gain.value = 0.12;
-
-noise.connect(gain);
-gain.connect(audioCtx.destination);
-
-noise.start();
-document.getElementById("audioBtn").innerText="AUDIO: ON";
-}
-
-/* ================= GLITCH ================= */
-function glitch(cb){
-let o=document.getElementById("glitchOverlay");
-let frames=["SYNCH","ANALIZA","BŁĄD","REKONSTRUKCJA","///"];
-let i=0;
-
-o.style.opacity=1;
-
-let int=setInterval(()=>{
-o.innerText=frames[i++]||"///";
-},120);
-
-setTimeout(()=>{
-clearInterval(int);
-o.style.opacity=0;
-cb();
-},900);
-}
-
-/* ================= FLOW ================= */
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
-
-function start(){glitch(()=>show("recruit"));}
-
-function genID(){
-return Math.floor(100000 + Math.random()*900000);
-}
-
-/* ================= NADZORCA ================= */
-function supervisor(name){
-let logs=[
-`// LOG: jednostka ${name} zaakceptowana warunkowo.`,
-`// OBSERWACJA: brak pełnej zgodności percepcyjnej.`,
-`// SYSTEM: rekrut wykazuje adaptację anomalii.`,
-`// UWAGA: archiwum nie weryfikuje pełnej tożsamości.`,
-`// STATUS: przyjęcie mimo nieciągłości danych.`
-];
-return logs[Math.floor(Math.random()*logs.length)];
-}
-
-/* ================= SUBMIT ================= */
-function submitRecruit(){
-name=document.getElementById("name").value;
-if(!name) return;
-
-id=genID();
-
-glitch(()=>show("loading"));
-
-setTimeout(()=>{
-show("form");
-},900);
-}
-
-/* ================= AKTA ================= */
-function generateFiles(){
-
-let qn=document.getElementById("q_name").value;
-let h=document.getElementById("q_house").value;
-let y=document.getElementById("q_year").value;
-
-let c1=document.getElementById("c1").checked;
-let c2=document.getElementById("c2").checked;
-let c3=document.getElementById("c3").checked;
-let c4=document.getElementById("c4").checked;
-
-let status="AKCEPTACJA WARUNKOWA";
-
-if(c1&&c3&&!c4) status="ANOMALIA ZAUWAŻONA";
-if(!c4) status="BRAK ZGODY SYSTEMOWEJ";
-if(Math.random()<0.15) status="REKORD NIEPEŁNY / KORUPCJA DANYCH";
-
-/* PREVIEW */
-document.getElementById("preview").innerHTML=`
-
-<div class="documentPreview">
-
-<h3>AKTA REKRUTA — INSTYTUT EKSPLOATACJI ANOMALII</h3>
-
-<p><b>Imię:</b> ${qn}</p>
-<p><b>ID:</b> ${id}</p>
-<p><b>Frakcja:</b> ${h}</p>
-<p><b>Poziom:</b> ${y}</p>
-
-<hr>
-
-<p><b>Status:</b> ${status}</p>
-
-<p><i>${supervisor(qn)}</i></p>
-
-<hr>
-
-<div class="stamp">ZAAKCEPTOWANO SYSTEMOWO</div>
-
-</div>
-`;
-
-/* DOWNLOAD HTML */
-let file=`
-<html>
-<head>
-<title>AKTA ${qn}</title>
-<style>
-body{
-font-family:Courier New;
-background:#f3f0df;
-padding:40px;
-}
-h1{font-size:20px;}
-</style>
-</head>
-<body>
-<h1>AKTA REKRUTA</h1>
-<p>Imię: ${qn}</p>
-<p>ID: ${id}</p>
-<p>Frakcja: ${h}</p>
-<p>Poziom: ${y}</p>
-<p>Status: ${status}</p>
-<p>${supervisor(qn)}</p>
-</body>
-</html>
-`;
-
-let blob=new Blob([file],{type:"text/html"});
-let url=URL.createObjectURL(blob);
-
-let a=document.createElement("a");
-a.href=url;
-a.download="AKTA_"+qn+".html";
-a.click();
-
-URL.revokeObjectURL(url);
-
-document.getElementById("out").innerHTML=
-`<div class="line glitch">${supervisor(qn)}</div>`;
-}
-
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
