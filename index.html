@@ -18,12 +18,11 @@ body{
     overflow:hidden;
 }
 
-/* glitch background */
+/* scanlines */
 body::before{
     content:"";
     position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
+    inset:0;
     background: repeating-linear-gradient(
         0deg,
         rgba(0,255,102,0.03),
@@ -34,41 +33,26 @@ body::before{
     pointer-events:none;
 }
 
-/* screen */
-.screen{
-    width:90%;
-    max-width:900px;
-}
-
-/* text */
-.line{
-    white-space:pre;
-    font-size:15px;
-    line-height:1.6;
-}
-
-/* glitch text */
+/* glitch */
 .glitch{
-    text-shadow: 2px 0 red, -2px 0 blue;
-    animation: flicker 2s infinite;
+    text-shadow:2px 0 red, -2px 0 blue;
+    animation:flicker 2s infinite;
 }
-
 @keyframes flicker{
     0%,100%{opacity:1;}
     50%{opacity:0.7;}
 }
 
-/* cursor */
-.cursor{
-    display:inline-block;
-    width:10px;
-    background:#00ff66;
-    animation:blink 0.8s infinite;
+/* layout */
+.screen{
+    width:90%;
+    max-width:900px;
 }
 
-@keyframes blink{
-    0%,50%{opacity:1;}
-    51%,100%{opacity:0;}
+.line{
+    white-space:pre;
+    font-size:15px;
+    line-height:1.6;
 }
 
 /* button */
@@ -78,10 +62,9 @@ button{
     color:#00ff66;
     border:1px solid #00ff66;
     padding:10px 15px;
-    font-family:Courier New, monospace;
+    font-family:Courier New;
     cursor:pointer;
 }
-
 button:hover{
     background:#00ff66;
     color:black;
@@ -92,13 +75,39 @@ input{
     background:black;
     border:1px solid #00ff66;
     color:#00ff66;
-    padding:5px;
+    padding:6px;
     margin-top:5px;
 }
 
 /* hidden screens */
-#form, #adminPanel{
+#form, #documentScreen, #loadingScreen{
     display:none;
+}
+
+/* LOADING BAR */
+.bar{
+    width:100%;
+    height:20px;
+    border:1px solid #00ff66;
+    margin-top:20px;
+}
+.barFill{
+    height:100%;
+    width:0%;
+    background:#00ff66;
+}
+
+/* STAMP */
+.stamp{
+    position:absolute;
+    top:120px;
+    right:60px;
+    border:4px solid red;
+    color:red;
+    font-weight:bold;
+    padding:10px;
+    transform:rotate(-10deg);
+    opacity:0;
 }
 </style>
 </head>
@@ -109,53 +118,54 @@ input{
 
 <!-- TERMINAL -->
 <div id="terminal">
-
-<div class="line glitch">BACKROOMS SYSTEM v0.9</div>
+<div class="line glitch">BACKROOMS SYSTEM v1.0</div>
 <br>
-
 <div class="line">Łączenie z Level 0...</div>
 <div class="line">[OK] Stabilne połączenie</div>
 <div class="line">[OK] Dostęp przyznany</div>
-<div class="line">[!] Wykryto anomalię pamięci</div>
-
-<br>
-
 <div class="line">STATUS: OCZEKIWANIE NA REKRUTA</div>
 <br>
-
-<div class="line">Naciśnij ENTER lub kliknij aby kontynuować</div>
-
-<button id="startBtn">[ WEJDŹ DO SYSTEMU ]</button>
-
+<button id="startBtn">WEJDŹ DO SYSTEMU</button>
 </div>
 
 <!-- FORM -->
 <div id="form">
-
 <div class="line glitch">REJESTRACJA REKRUTA</div>
 <br>
 
 <label>IMIĘ I NAZWISKO:</label><br>
-<input id="recruitName" type="text"><br><br>
+<input id="name" type="text"><br><br>
 
-<button id="submitBtn">ZATWIERDŹ REKRUTACJĘ</button>
+<button id="submitBtn">ZATWIERDŹ</button>
 
 <br><br>
-
 <div id="result"></div>
-
 </div>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel">
-
-<div class="line glitch">PANEL SYSTEMOWY - REKRUTY</div>
+<!-- LOADING -->
+<div id="loadingScreen">
+<div class="line glitch">PRZETWARZANIE DANYCH...</div>
 <br>
 
-<div id="list"></div>
+<div class="line" id="loadingText">Inicjalizacja akta...</div>
 
+<div class="bar"><div class="barFill" id="barFill"></div></div>
+</div>
+
+<!-- DOCUMENT -->
+<div id="documentScreen">
+
+<div class="stamp" id="stamp">ZAAKCEPTOWANO</div>
+
+<div class="line glitch">INSTYTUT BACKROOMS</div>
 <br>
-<button onclick="closeAdmin()">ZAMKNIJ PANEL</button>
+
+<div class="info-box" id="infoBox">
+<p><strong>NUMER AKT:</strong> BR-2026-074</p>
+<p><strong>POZIOM DOSTĘPU:</strong> 0</p>
+</div>
+
+<div class="line" id="finalText"></div>
 
 </div>
 
@@ -163,78 +173,99 @@ input{
 
 <script>
 
+let recruitName = "";
+let recruitID = 0;
+
 /* START */
-function startGame(){
+document.getElementById("startBtn").onclick = () => {
     document.getElementById("terminal").style.display = "none";
     document.getElementById("form").style.display = "block";
-}
+};
 
-document.getElementById("startBtn").addEventListener("click", startGame);
-
-document.addEventListener("keydown", function(e){
-    if(e.key === "Enter"){
-        startGame();
-    }
-});
-
-/* ID generator */
+/* ID */
 function generateID(){
-    return Math.floor(100000 + Math.random() * 900000);
+    return Math.floor(100000 + Math.random()*900000);
 }
 
-/* save system */
-function saveRecruit(name, id){
-    let data = JSON.parse(localStorage.getItem("recruits") || "[]");
-    data.push({name:name, id:id});
-    localStorage.setItem("recruits", JSON.stringify(data));
-}
+/* SUBMIT */
+document.getElementById("submitBtn").onclick = () => {
 
-/* submit */
-document.getElementById("submitBtn").addEventListener("click", function(){
+    recruitName = document.getElementById("name").value;
 
-    let name = document.getElementById("recruitName").value;
-
-    if(name.trim() === ""){
-        alert("BŁĄD: brak danych rekruta");
+    if(!recruitName){
+        alert("BRAK DANYCH");
         return;
     }
 
-    let id = generateID();
+    recruitID = generateID();
 
-    saveRecruit(name, id);
+    document.getElementById("result").innerHTML =
+        `<div class="line glitch">SUKCES</div>
+         <div class="line">REKRUT: ${recruitName}</div>
+         <div class="line">ID: ${recruitID}</div>`;
 
-    document.getElementById("result").innerHTML = `
-        <div class="line glitch">SUKCES</div>
-        <div class="line">ZAREKRUTOWANO: ${name}</div>
-        <div class="line">ID SYSTEMOWE: ${id}</div>
-    `;
-});
+    startLoading();
+};
 
-/* ADMIN PANEL */
-document.addEventListener("keydown", function(e){
-    if(e.ctrlKey && e.shiftKey && e.key === "A"){
-        openAdmin();
-    }
-});
+/* LOADING EFFECT */
+function startLoading(){
 
-function openAdmin(){
     document.getElementById("form").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
+    document.getElementById("loadingScreen").style.display = "block";
 
-    let data = JSON.parse(localStorage.getItem("recruits") || "[]");
+    let bar = document.getElementById("barFill");
+    let text = document.getElementById("loadingText");
 
-    let html = "";
+    let progress = 0;
 
-    data.forEach(r => {
-        html += `<div class="line">${r.name} — ${r.id}</div>`;
-    });
+    let messages = [
+        "Inicjalizacja akta...",
+        "Skanowanie pamięci...",
+        "Łączenie z archiwum...",
+        "Analiza anomalii...",
+        "Tworzenie profilu..."
+    ];
 
-    document.getElementById("list").innerHTML = html || "BRAK REKRUTÓW";
+    let i = 0;
+
+    let interval = setInterval(() => {
+
+        progress += 5;
+        bar.style.width = progress + "%";
+
+        if(progress % 20 === 0 && i < messages.length){
+            text.innerText = messages[i];
+            i++;
+        }
+
+        if(progress >= 100){
+            clearInterval(interval);
+            showDocument();
+        }
+
+    }, 120);
 }
 
-function closeAdmin(){
-    document.getElementById("adminPanel").style.display = "none";
-    document.getElementById("form").style.display = "block";
+/* DOCUMENT */
+function showDocument(){
+
+    document.getElementById("loadingScreen").style.display = "none";
+    document.getElementById("documentScreen").style.display = "block";
+
+    document.getElementById("finalText").innerHTML =
+        `ZAREKRUTOWANO: ${recruitName}<br>ID SYSTEMOWE: ${recruitID}`;
+
+    setTimeout(() => {
+        document.getElementById("stamp").style.opacity = 1;
+    }, 800);
+
+    playSound();
+}
+
+/* SOUND */
+function playSound(){
+    const audio = new Audio("https://actions.google.com/sounds/v1/office/printer.ogg");
+    audio.play();
 }
 
 </script>
