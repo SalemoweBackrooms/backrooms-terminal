@@ -1,9 +1,11 @@
 let audioOn = false;
+let status = "STABILNY";
 
+/* AUDIO */
 function toggleAudio(){
   audioOn = !audioOn;
 
-  document.getElementById("audioToggle").innerText =
+  document.querySelector("#audioPanel button").innerText =
     audioOn ? "AUDIO: ON" : "AUDIO: OFF";
 
   if(audioOn){
@@ -14,138 +16,115 @@ function toggleAudio(){
   }
 }
 
-/* BOOT */
-window.onload = function(){
+/* GLITCH */
+function glitch(){
+  const g = document.getElementById("glitchOverlay");
+  g.style.opacity = 0.6;
+  setTimeout(()=> g.style.opacity = 0, 120);
+}
 
-  setTimeout(()=>{
-    document.getElementById("boot").classList.add("hidden");
-    document.getElementById("nadzorcaBox").classList.remove("hidden");
+/* SCREEN ENGINE */
+function next(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 
-    document.getElementById("nadzorcaText").innerText =
-      "System aktywny. Rekrut oczekuje na inicjację.";
-  },2000);
+  document.getElementById("click").play();
+
+  if(id === "intro"){
+    updateNadzorca("Jednostka wykryta. Rozpoczynanie procedury.");
+  }
+
+  if(id === "form"){
+    updateNadzorca("Rejestracja aktywna.");
+  }
+
+  if(id === "quiz"){
+    updateNadzorca("Przetwarzanie odpowiedzi...");
+  }
+
+  glitch();
+}
+
+/* NADZORCA */
+function updateNadzorca(text){
+  document.getElementById("nadzorca").innerText = text;
+}
+
+/* INTRO TEXT */
+window.onload = ()=>{
+  updateNadzorca("SYSTEM BOOT");
+  document.getElementById("introText").innerText =
+  "Nie opuszczaj procedury. Dane zostaną zapisane w Instytucie.";
 };
 
-/* FLOW */
-function startForm(){
-  document.getElementById("nadzorcaBox").classList.add("hidden");
-  document.getElementById("form").classList.remove("hidden");
-}
-
-function toQuestionnaire(){
-  document.getElementById("form").classList.add("hidden");
-  document.getElementById("quiz").classList.remove("hidden");
-}
-
+/* ANALIZA */
 function analyze(){
 
-  let score = 0;
+  const score =
+    (q1.value==="TAK"?1:0)+
+    (q2.value==="TAK"?1:0)+
+    (q3.value==="TAK"?1:0)+
+    (q4.value==="TAK"?1:0);
 
-  ["q1","q2","q3","q4"].forEach(id=>{
-    if(document.getElementById(id).value === "TAK") score++;
-  });
+  if(score>=3) status="ANOMALIA";
+  else if(score===2) status="NIESTABILNY";
+  else status="STABILNY";
 
-  let status =
-    score >= 3 ? "ANOMALIA"
-    : score === 2 ? "NIESTABILNY"
-    : "STABILNY";
-
-  document.getElementById("quiz").classList.add("hidden");
-  document.getElementById("analysis").classList.remove("hidden");
+  updateNadzorca("Analiza zakończona: " + status);
 
   document.getElementById("analysisText").innerText =
-    "Status: " + status;
+    "STATUS: " + status;
 
-  setTimeout(()=>{
-    generateFile(status);
-  },2000);
+  setTimeout(()=>generateDoc(),1500);
+  setTimeout(()=>next("document"),1800);
 }
 
-/* AKTA HTML */
-function generateFile(status){
+/* AKTA */
+function generateDoc(){
 
-  let name = document.getElementById("name").value;
-  let surname = document.getElementById("surname").value;
-  let age = document.getElementById("age").value;
-  let role = document.getElementById("role").value;
+  const name = document.getElementById("name").value;
+  const surname = document.getElementById("surname").value;
+  const age = document.getElementById("age").value;
+  const role = document.getElementById("role").value;
 
-  let html = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>AKTA INSTYTUTU</title>
+  const html = `
+  <div class="stamp">RECOVERED FILE</div>
 
-<style>
-body{
-  background: repeating-linear-gradient(0deg,#1c1c1c,#1c1c1c 2px,#222 4px);
-  font-family:Courier New;
-  padding:40px;
-}
+  <h2>AKTA REKRUTA // BACKROOMS INSTITUTE</h2>
 
-.doc{
-  background:#f3f0df;
-  padding:30px;
-  border:3px solid black;
-  max-width:900px;
-  margin:auto;
-}
+  <p><b>IMIĘ:</b> ${name}</p>
+  <p><b>NAZWISKO:</b> ${surname}</p>
+  <p><b>WIEK:</b> ${age}</p>
+  <p><b>DOM/FUNKCJA:</b> ${role}</p>
 
-.warning{
-  border-left:8px solid darkred;
-  background:#fff1d6;
-  padding:10px;
-}
+  <div class="stamp">STATUS: ${status}</div>
 
-.top{
-  background:black;
-  color:white;
-  padding:10px;
-}
-</style>
-</head>
+  <p>
+  Jednostka zakwalifikowana do obserwacji.
+  Nadzorca zaleca ciągły monitoring.
+  </p>
+  `;
 
-<body>
+  document.getElementById("paperDoc").innerHTML = html;
 
-<div class="doc">
+  window.fileData = `
+BACKROOMS INSTITUTE FILE
 
-<div class="top">BACKROOMS INSTITUTE // ARCHIVE NODE</div>
+IMIĘ: ${name}
+NAZWISKO: ${surname}
+WIEK: ${age}
+FUNKCJA: ${role}
+STATUS: ${status}
 
-<h2>AKTA REKRUTA</h2>
-
-<div class="warning">
-RECOVERED FILE // PARTIAL INTEGRITY
-</div>
-
-<p><b>IMIĘ:</b> ${name}</p>
-<p><b>NAZWISKO:</b> ${surname}</p>
-<p><b>WIEK:</b> ${age}</p>
-<p><b>DOM/FUNKCJA:</b> ${role}</p>
-
-<p><b>STATUS:</b> ${status}</p>
-
-<div class="warning">
-REKOMENDACJA: STAŁA OBSERWACJA
-</div>
-
-<p>SYSTEM: jednostka zakwalifikowana do monitoringu Instytutu.</p>
-
-</div>
-
-</body>
-</html>
+-- END OF FILE --
 `;
-
-  document.getElementById("files").classList.remove("hidden");
-  document.getElementById("document").innerText = html;
-  window.generatedFile = html;
 }
 
 /* DOWNLOAD */
-function downloadFile(){
-  let blob = new Blob([window.generatedFile], {type:"text/html"});
-  let a = document.createElement("a");
+function downloadDoc(){
+  const blob = new Blob([window.fileData], {type:"text/plain"});
+  const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "AKTA_INSTYTUTU.html";
+  a.download = "AKTA_INSTYTUTU.txt";
   a.click();
 }
