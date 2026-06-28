@@ -1,37 +1,113 @@
 body{
-  background:black;
-  color:#00ff9d;
-  font-family: monospace;
   margin:0;
-  padding:20px;
+  background: repeating-linear-gradient(
+    0deg,
+    #1b1b1b,
+    #1b1b1b 2px,
+    #222 4px
+  );
+  font-family: monospace;
+  color:#000;
 }
 
-.hidden{ display:none; }
+/* SCREENS */
+.screen{
+  display:none;
+  padding:40px;
+}
+.screen.active{
+  display:block;
+}
 
-button{
+/* NADZORCA */
+#nadzorca{
+  position:fixed;
+  top:10px;
+  left:10px;
   background:black;
-  border:1px solid #00ff9d;
   color:#00ff9d;
   padding:8px;
-  margin:5px;
+  font-size:12px;
+  z-index:999;
 }
 
-input, select{
+/* GLITCH */
+#glitchOverlay{
+  position:fixed;
+  inset:0;
+  background:white;
+  opacity:0;
+  pointer-events:none;
+  transition:0.1s;
+}
+
+/* BOX */
+.box{
+  border:2px solid #000;
+  background:#f3f0df;
+  padding:20px;
+  max-width:900px;
+}
+
+/* PAPER DOC STYLE */
+.paper{
+  background:#f3f0df;
+  border:3px solid black;
+  padding:20px;
+  max-width:900px;
+}
+
+/* BANNER */
+.banner{
   background:black;
-  border:1px solid #00ff9d;
+  color:white;
+  padding:10px;
+  font-size:12px;
+  letter-spacing:2px;
+  margin-bottom:15px;
+}
+
+/* SECTIONS */
+.section{
+  margin-top:15px;
+  font-weight:bold;
+}
+
+/* INPUTS */
+input, select{
+  display:block;
+  margin:10px 0;
+  padding:8px;
+  width:100%;
+  background:black;
   color:#00ff9d;
-  margin:5px;
-  padding:5px;
-}
-
-.terminal{
-  padding:20px;
   border:1px solid #00ff9d;
 }
 
-#document{
-  background:
-    repeating-linear-gradient(0deg,#1c1c1c,#1c1c1c 2px,#222 4px);
-  padding:20px;
-  color:black;
+/* BUTTONS */
+button{
+  margin-top:15px;
+  padding:10px;
+  background:black;
+  color:#00ff9d;
+  border:1px solid #00ff9d;
+}
+
+/* AKTA PAPER */
+#paperDoc{
+  background:#f3f0df;
+  padding:25px;
+  border:3px solid black;
+  box-shadow:0 0 40px rgba(0,0,0,0.7);
+}
+
+/* STAMPS */
+.stamp{
+  display:inline-block;
+  border:3px solid darkred;
+  color:darkred;
+  padding:8px;
+  transform:rotate(-10deg);
+  margin:10px 0;
+  font-weight:bold;
 }
