@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>INSTYTUT BACKROOMS — SYSTEM REKRUTACJI</title>
+<title>INSTYTUT EKSPLOATACJI ANOMALII — SYSTEM REKRUTACJI</title>
 
 <style>
 body{
-    margin:0;
-    background:black;
-    color:#00ff66;
-    font-family:Courier New;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow:hidden;
+margin:0;
+background:black;
+color:#00ff66;
+font-family:Courier New;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
 }
 
 .screen{display:none;width:90%;max-width:1000px;}
@@ -25,49 +25,63 @@ body{
 .glitch{text-shadow:2px 0 red,-2px 0 blue;}
 
 button{
-    margin-top:20px;
-    background:black;
-    color:#00ff66;
-    border:1px solid #00ff66;
-    padding:10px;
-    cursor:pointer;
+margin-top:20px;
+background:black;
+color:#00ff66;
+border:1px solid #00ff66;
+padding:10px;
+cursor:pointer;
 }
 button:hover{background:#00ff66;color:black;}
 
 input{
-    background:black;
-    border:1px solid #00ff66;
-    color:#00ff66;
-    padding:6px;
+background:black;
+border:1px solid #00ff66;
+color:#00ff66;
+padding:6px;
 }
 
-.bar{width:100%;height:20px;border:1px solid #00ff66;margin-top:15px;}
+.bar{width:100%;height:18px;border:1px solid #00ff66;margin-top:15px;}
 .fill{height:100%;width:0%;background:#00ff66;}
 
 #glitchOverlay{
-    position:fixed;
-    inset:0;
-    background:black;
-    color:#00ff66;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:20px;
-    opacity:0;
-    pointer-events:none;
-    z-index:9999;
+position:fixed;
+inset:0;
+background:black;
+color:#00ff66;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:20px;
+opacity:0;
+pointer-events:none;
+z-index:9999;
 }
 
+/* STAMP */
 .stamp{
-    position:absolute;
-    top:120px;
-    right:80px;
-    border:4px solid red;
-    color:red;
-    padding:10px;
-    transform:rotate(-10deg);
-    opacity:0;
-    font-weight:bold;
+position:absolute;
+top:120px;
+right:80px;
+border:4px solid red;
+color:red;
+padding:10px;
+transform:rotate(-10deg);
+opacity:0;
+font-weight:bold;
+}
+
+/* AUDIO BUTTON */
+#audioBtn{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#000;
+border:1px solid #00ff66;
+color:#00ff66;
+padding:8px;
+cursor:pointer;
+font-size:12px;
 }
 </style>
 </head>
@@ -76,12 +90,16 @@ input{
 
 <div id="glitchOverlay">SYSTEM INITIALIZATION ERROR</div>
 
+<button id="audioBtn" onclick="toggleAudio()">AUDIO: OFF</button>
+
 <!-- TERMINAL -->
 <div id="terminal" class="screen active">
-<div class="line glitch">INSTYTUT EKSPLOATACJI ANOMALII — SYSTEM REKRUTACYJNY</div>
+<div class="line glitch">INSTYTUT EKSPLOATACJI ANOMALII</div>
+<div class="line">SYSTEM REKRUTACYJNY v9</div>
 <br>
 <div class="line">Łączenie z archiwum centralnym...</div>
-<div class="line">Status: oczekiwanie na jednostkę rekrutacyjną</div>
+<div class="line">Oczekiwanie na jednostkę rekrutacyjną...</div>
+
 <button onclick="start()">WEJDŹ DO SYSTEMU</button>
 </div>
 
@@ -97,7 +115,7 @@ input{
 
 <!-- LOADING -->
 <div id="loading" class="screen">
-<div class="line glitch">TWORZENIE AKT PERSONALNYCH...</div>
+<div class="line glitch">TWORZENIE AKT...</div>
 <div class="bar"><div class="fill" id="bar"></div></div>
 </div>
 
@@ -109,6 +127,7 @@ input{
 
 <!-- FORM -->
 <div id="form" class="screen">
+
 <div class="line glitch">FORMULARZ AKT PERSONALNYCH</div>
 
 <br>
@@ -122,17 +141,17 @@ input{
 
 <div class="line">ZGODNOŚĆ OPERACYJNA</div>
 
-<label><input type="checkbox" id="c1"> Będę wykonywać polecenia kadry nadzorującej</label><br>
-<label><input type="checkbox" id="c2"> Zgłaszam wszystkie anomalie i nieprawidłowości</label><br>
-<label><input type="checkbox" id="c3"> Przyjmuję ryzyko operacyjne</label><br>
+<label><input type="checkbox" id="c1"> Będę wykonywać polecenia instytutu</label><br>
+<label><input type="checkbox" id="c2"> Zgłaszam anomalie przestrzenne</label><br>
+<label><input type="checkbox" id="c3"> Akceptuję ryzyko operacyjne</label><br>
 
 <br>
 
 <div class="line">WSTĘPNA OCENA</div>
 
-<label><input type="checkbox"> Czy zdarzyło Ci się zgubić w znanym miejscu</label><br>
-<label><input type="checkbox"> Czy słyszałeś dźwięki bez źródła</label><br>
-<label><input type="checkbox"> Czy ufasz rzeczywistości</label><br>
+<label><input type="checkbox"> Utrata orientacji w znanym miejscu</label><br>
+<label><input type="checkbox"> Dźwięki bez źródła</label><br>
+<label><input type="checkbox"> Wątpliwość wobec rzeczywistości</label><br>
 
 <br>
 
@@ -146,32 +165,61 @@ input{
 
 let name="";
 let id=0;
-let recruits=JSON.parse(localStorage.getItem("recruits")||"[]");
-let outcome="neutral";
+let audioEnabled=false;
 
-/* NADZORCA — bardziej instytutowy */
-function npcMessage(type){
+/* AUDIO (ambient + glitch) */
+let ctx;
+let hum;
 
-if(type==="accepted") return "RAPORT NADZORCY: jednostka zakwalifikowana do dalszego przetwarzania.";
-if(type==="rejected") return "RAPORT NADZORCY: jednostka odrzucona — brak zgodności strukturalnej.";
-if(type==="anomaly") return "RAPORT NADZORCY: wykryto niestabilność danych operacyjnych.";
-if(type==="secret") return "RAPORT NADZORCY: brak możliwości klasyfikacji jednostki.";
+function initAudio(){
+ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-return "RAPORT NADZORCY: monitoring aktywny.";
+hum = ctx.createOscillator();
+let gain = ctx.createGain();
+
+hum.type="sine";
+hum.frequency.value=55;
+gain.gain.value=0.02;
+
+hum.connect(gain);
+gain.connect(ctx.destination);
+hum.start();
 }
 
-function show(s){
-document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-document.getElementById(s).classList.add("active");
+function toggleAudio(){
+audioEnabled=!audioEnabled;
+document.getElementById("audioBtn").innerText =
+audioEnabled ? "AUDIO: ON" : "AUDIO: OFF";
+
+if(audioEnabled) initAudio();
 }
 
+/* NADZORCA (oryginalny vibe) */
+function npc(){
+const lines=[
+"...obserwacja trwa.",
+"rekrut nie powinien być tutaj.",
+"system nie rozpoznaje pełnej struktury.",
+"coś zostało pominięte.",
+"archiwum reaguje."
+];
+return lines[Math.floor(Math.random()*lines.length)];
+}
+
+/* GLITCH */
 function glitch(cb){
 let o=document.getElementById("glitchOverlay");
-let t=["INITIALIZING","ANALYSIS","CORRUPTION CHECK","///","SYNC"];
+let t=["INITIALIZING","SYNC","ERROR","REALIGN","///"];
 let i=0;
 o.style.opacity=1;
 let int=setInterval(()=>o.innerText=t[i++]||"///",120);
 setTimeout(()=>{clearInterval(int);o.style.opacity=0;cb();},900);
+}
+
+/* SCREEN */
+function show(s){
+document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+document.getElementById(s).classList.add("active");
 }
 
 function start(){glitch(()=>show("recruit"));}
@@ -182,7 +230,7 @@ return Math.floor(100000+Math.random()*900000);
 
 function submitRecruit(){
 name=document.getElementById("name").value;
-if(!name) return alert("Brak danych identyfikacyjnych");
+if(!name) return alert("Brak danych");
 id=genID();
 startLoading();
 }
@@ -191,6 +239,7 @@ function startLoading(){
 show("loading");
 let b=document.getElementById("bar");
 let p=0;
+
 let int=setInterval(()=>{
 p+=6;
 b.style.width=p+"%";
@@ -206,7 +255,7 @@ glitch(()=>{
 show("stampScreen");
 document.getElementById("stamp").style.opacity=1;
 document.getElementById("info").innerHTML=
-`REKRUT: ${name}<br>ID: ${id}`;
+`REKRUT: ${name}<br>ID: ${id}<br><br><span class="line glitch">${npc()}</span>`;
 setTimeout(()=>glitch(()=>show("form")),1800);
 });
 }
@@ -221,91 +270,92 @@ let c1=document.getElementById("c1").checked;
 let c2=document.getElementById("c2").checked;
 let c3=document.getElementById("c3").checked;
 
-/* LOGIKA */
-outcome="accepted";
+let outcome="AKCEPTACJA WARUNKOWA";
 
-if(!qn||!h||!y) outcome="rejected";
-if(Math.random()<0.18) outcome="anomaly";
-if(c1&&c2&&c3) outcome="secret";
-if(qn.toLowerCase().includes("null")) outcome="secret";
+if(!qn||!h||!y) outcome="ODRZUT — BRAK DANYCH";
+if(Math.random()<0.2) outcome="ANOMALIA SYSTEMOWA";
+if(c1&&c2&&c3&&Math.random()<0.3) outcome="REKOMENDACJA — POZIOM UKRYTY";
 
-/* SAVE */
-recruits.push({qn,h,y,c1,c2,c3,id,outcome});
-localStorage.setItem("recruits",JSON.stringify(recruits));
-
-/* OUTPUT */
-document.getElementById("out").innerHTML=
-`<div class="line glitch">${npcMessage(outcome)}</div>`;
-
-/* === DOKUMENT INSTYTUTU === */
-
-let bg="#f8f5e6";
-let col="#000";
-
-if(outcome==="rejected"){bg="#2a0000";col="#ff4444";}
-if(outcome==="anomaly"){bg="#1a1a1a";col="#ffb300";}
-if(outcome==="secret"){bg="#0a0a2a";col="#66aaff";}
-
-let doc=`
+let doc = `
 <html>
 <head>
 <style>
 body{
-background:${bg};
-color:${col};
+background:
+linear-gradient(rgba(0,0,0,0.05),rgba(0,0,0,0.2)),
+#f3f0e6;
 font-family:Arial;
 padding:40px;
+color:#000;
 }
-.document{
+
+.paper{
 max-width:900px;
 margin:auto;
-border:4px solid #000;
 background:rgba(255,255,255,0.85);
+border:2px solid #000;
 padding:30px;
+box-shadow:0 0 30px rgba(0,0,0,0.3);
+position:relative;
 }
+
+/* WATERMARK */
+.paper::before{
+content:"IEA — ARCHIWUM";
+position:absolute;
+top:40%;
+left:10%;
+font-size:60px;
+opacity:0.05;
+transform:rotate(-20deg);
+}
+
+.title{
+font-weight:bold;
+font-size:22px;
+margin-bottom:20px;
+}
+
 .section{
-margin:15px 0;
+margin:12px 0;
 padding:10px;
 border-bottom:1px solid #000;
 }
-.title{
-font-weight:bold;
-font-size:20px;
-margin-bottom:20px;
-}
+
 .stamp{
 color:red;
+font-size:26px;
 font-weight:bold;
-font-size:22px;
-transform:rotate(-5deg);
+transform:rotate(-8deg);
 display:inline-block;
+border:3px solid red;
+padding:10px;
 }
 </style>
 </head>
-<body>
 
-<div class="document">
+<body>
+<div class="paper">
 
 <div class="title">INSTYTUT EKSPLOATACJI ANOMALII — AKTA REKRUTA</div>
 
-<div class="section">DANE PERSONELU:<br>
-${qn}<br>${h}<br>${y}</div>
+<div class="section">IMIĘ I NAZWISKO: ${qn}</div>
+<div class="section">ID: ${id}</div>
+<div class="section">DOM / FRAKCJA: ${h}</div>
+<div class="section">ROK SZKOLENIA: ${y}</div>
 
-<div class="section">IDENTYFIKATOR:<br>${id}</div>
-
-<div class="section">STATUS SYSTEMOWY:<br>${outcome}</div>
+<div class="section">STATUS SYSTEMOWY: ${outcome}</div>
 
 <div class="section">ZGODNOŚĆ OPERACYJNA:<br>
-procedury: ${c1}<br>
-anomalie: ${c2}<br>
-ryzyko: ${c3}</div>
+- Procedury: ${c1}<br>
+- Anomalie: ${c2}<br>
+- Ryzyko: ${c3}</div>
 
-<div class="section stamp">
-${npcMessage(outcome)}
+<br>
+
+<div class="stamp">${npc()}</div>
+
 </div>
-
-</div>
-
 </body>
 </html>
 `;
@@ -319,6 +369,9 @@ a.download="AKTA_"+qn+".html";
 a.click();
 
 URL.revokeObjectURL(url);
+
+document.getElementById("out").innerHTML=
+`<div class="line glitch">${npc()}</div>`;
 }
 
 </script>
