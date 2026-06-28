@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BACKROOMS SYSTEM</title>
+<title>BACKROOMS RECRUITMENT SYSTEM</title>
 
 <style>
 body{
@@ -15,27 +15,50 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
+    overflow:hidden;
 }
 
-/* ekran */
+/* glitch background */
+body::before{
+    content:"";
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0,255,102,0.03),
+        rgba(0,255,102,0.03) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events:none;
+}
+
+/* screen */
 .screen{
     width:90%;
     max-width:900px;
 }
 
-/* tekst terminala */
+/* text */
 .line{
     white-space:pre;
     font-size:15px;
     line-height:1.6;
 }
 
-/* glitch */
+/* glitch text */
 .glitch{
-    text-shadow:1px 0 red, -1px 0 blue;
+    text-shadow: 2px 0 red, -2px 0 blue;
+    animation: flicker 2s infinite;
 }
 
-/* kursor */
+@keyframes flicker{
+    0%,100%{opacity:1;}
+    50%{opacity:0.7;}
+}
+
+/* cursor */
 .cursor{
     display:inline-block;
     width:10px;
@@ -48,7 +71,7 @@ body{
     51%,100%{opacity:0;}
 }
 
-/* przycisk */
+/* button */
 button{
     margin-top:20px;
     background:black;
@@ -64,16 +87,18 @@ button:hover{
     color:black;
 }
 
-/* formularz */
-#form{
-    display:none;
-}
+/* inputs */
 input{
     background:black;
     border:1px solid #00ff66;
     color:#00ff66;
     padding:5px;
     margin-top:5px;
+}
+
+/* hidden screens */
+#form, #adminPanel{
+    display:none;
 }
 </style>
 </head>
@@ -82,16 +107,16 @@ input{
 
 <div class="screen">
 
-<!-- 🔥 START TERMINAL -->
+<!-- TERMINAL -->
 <div id="terminal">
 
-<div class="line glitch">BACKROOMS EXPLORATION SYSTEM</div>
+<div class="line glitch">BACKROOMS SYSTEM v0.9</div>
 <br>
 
 <div class="line">Łączenie z Level 0...</div>
-<div class="line">[OK] Połączenie stabilne</div>
+<div class="line">[OK] Stabilne połączenie</div>
 <div class="line">[OK] Dostęp przyznany</div>
-<div class="line">[!] Wykryto anomalie przestrzenne</div>
+<div class="line">[!] Wykryto anomalię pamięci</div>
 
 <br>
 
@@ -104,26 +129,33 @@ input{
 
 </div>
 
-<!-- 🧠 FORMULARZ -->
+<!-- FORM -->
 <div id="form">
 
 <div class="line glitch">REJESTRACJA REKRUTA</div>
 <br>
 
-<label>ID REKRUTA:</label><br>
-<input type="text"><br><br>
+<label>IMIĘ I NAZWISKO:</label><br>
+<input id="recruitName" type="text"><br><br>
 
-<label>POZIOM DOSTĘPU:</label><br>
-<input type="text"><br><br>
-
-<label>STATUS PSYCHICZNY:</label><br>
-<input type="text"><br><br>
-
-<button id="submitBtn">ZATWIERDŹ</button>
+<button id="submitBtn">ZATWIERDŹ REKRUTACJĘ</button>
 
 <br><br>
 
-<div class="line">SYSTEM: OCZEKUJE NA WERYFIKACJĘ...</div>
+<div id="result"></div>
+
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+
+<div class="line glitch">PANEL SYSTEMOWY - REKRUTY</div>
+<br>
+
+<div id="list"></div>
+
+<br>
+<button onclick="closeAdmin()">ZAMKNIJ PANEL</button>
 
 </div>
 
@@ -131,20 +163,79 @@ input{
 
 <script>
 
+/* START */
 function startGame(){
     document.getElementById("terminal").style.display = "none";
     document.getElementById("form").style.display = "block";
 }
 
-/* klik */
 document.getElementById("startBtn").addEventListener("click", startGame);
 
-/* ENTER */
 document.addEventListener("keydown", function(e){
     if(e.key === "Enter"){
         startGame();
     }
 });
+
+/* ID generator */
+function generateID(){
+    return Math.floor(100000 + Math.random() * 900000);
+}
+
+/* save system */
+function saveRecruit(name, id){
+    let data = JSON.parse(localStorage.getItem("recruits") || "[]");
+    data.push({name:name, id:id});
+    localStorage.setItem("recruits", JSON.stringify(data));
+}
+
+/* submit */
+document.getElementById("submitBtn").addEventListener("click", function(){
+
+    let name = document.getElementById("recruitName").value;
+
+    if(name.trim() === ""){
+        alert("BŁĄD: brak danych rekruta");
+        return;
+    }
+
+    let id = generateID();
+
+    saveRecruit(name, id);
+
+    document.getElementById("result").innerHTML = `
+        <div class="line glitch">SUKCES</div>
+        <div class="line">ZAREKRUTOWANO: ${name}</div>
+        <div class="line">ID SYSTEMOWE: ${id}</div>
+    `;
+});
+
+/* ADMIN PANEL */
+document.addEventListener("keydown", function(e){
+    if(e.ctrlKey && e.shiftKey && e.key === "A"){
+        openAdmin();
+    }
+});
+
+function openAdmin(){
+    document.getElementById("form").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+
+    let data = JSON.parse(localStorage.getItem("recruits") || "[]");
+
+    let html = "";
+
+    data.forEach(r => {
+        html += `<div class="line">${r.name} — ${r.id}</div>`;
+    });
+
+    document.getElementById("list").innerHTML = html || "BRAK REKRUTÓW";
+}
+
+function closeAdmin(){
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("form").style.display = "block";
+}
 
 </script>
 
