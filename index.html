@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BACKROOMS SYSTEM</title>
+<title>BACKROOMS SYSTEM v7</title>
 
 <style>
 body{
@@ -18,18 +18,12 @@ body{
     overflow:hidden;
 }
 
-/* SCREENS */
-.screen{
-    display:none;
-    width:90%;
-    max-width:1000px;
-}
+.screen{display:none;width:90%;max-width:1000px;}
 .active{display:block;}
 
 .line{white-space:pre;font-size:15px;line-height:1.6;}
 .glitch{text-shadow:2px 0 red,-2px 0 blue;}
 
-/* UI */
 button{
     margin-top:20px;
     background:black;
@@ -47,24 +41,9 @@ input{
     padding:6px;
 }
 
-/* LOADING */
 .bar{width:100%;height:20px;border:1px solid #00ff66;margin-top:15px;}
 .fill{height:100%;width:0%;background:#00ff66;}
 
-/* STAMP */
-.stamp{
-    position:absolute;
-    top:120px;
-    right:80px;
-    border:4px solid red;
-    color:red;
-    padding:10px;
-    transform:rotate(-10deg);
-    opacity:0;
-    font-weight:bold;
-}
-
-/* OVERLAY */
 #glitchOverlay{
     position:fixed;
     inset:0;
@@ -74,265 +53,224 @@ input{
     justify-content:center;
     align-items:center;
     font-size:20px;
-    letter-spacing:2px;
     opacity:0;
     pointer-events:none;
     z-index:9999;
 }
 
-/* ADMIN */
-#adminList .line{
-    margin-bottom:15px;
+.stamp{
+    position:absolute;
+    top:120px;
+    right:80px;
+    border:4px solid red;
+    color:red;
+    padding:10px;
+    transform:rotate(-10deg);
+    opacity:0;
 }
 </style>
 </head>
 
 <body>
 
-<!-- GLITCH -->
 <div id="glitchOverlay">SYSTEM ERROR</div>
 
 <!-- TERMINAL -->
 <div id="terminal" class="screen active">
-<div class="line glitch">BACKROOMS SYSTEM v5</div>
+<div class="line glitch">BACKROOMS SYSTEM v7</div>
 <br>
-<div class="line">Łączenie z Level 0...</div>
-<div class="line">STATUS: OCZEKIWANIE</div>
-
-<button onclick="startRecruit()">WEJDŹ DO SYSTEMU</button>
-<button onclick="openAdmin()">SYSTEM ADMIN</button>
+<div class="line">Łączenie z systemem...</div>
+<button onclick="start()">WEJDŹ</button>
 </div>
 
 <!-- RECRUIT -->
 <div id="recruit" class="screen">
-<div class="line glitch">REJESTRACJA REKRUTA</div>
-<br>
-
-<input id="name" placeholder="Imię i nazwisko">
+<div class="line glitch">REJESTRACJA</div>
+<input id="name">
 <br><br>
-
-<button onclick="submitRecruit()">ZATWIERDŹ</button>
-
-<br><br>
+<button onclick="submitRecruit()">OK</button>
 <div id="result"></div>
 </div>
 
 <!-- LOADING -->
 <div id="loading" class="screen">
-<div class="line glitch">PRZETWARZANIE AKT...</div>
-<br>
-
-<div class="line" id="loadingText">inicjalizacja...</div>
+<div class="line glitch">PRZETWARZANIE...</div>
 <div class="bar"><div class="fill" id="bar"></div></div>
 </div>
 
 <!-- STAMP -->
 <div id="stampScreen" class="screen">
 <div class="stamp" id="stamp">ZAAKCEPTOWANO</div>
-
-<div class="line glitch">SYSTEM REKRUTACYJNY</div>
-<br>
-
-<div id="systemInfo"></div>
-<br>
-<div class="line">PRZEKIEROWANIE DO KWESTIONARIUSZA...</div>
+<div id="info"></div>
 </div>
 
-<!-- QUESTIONNAIRE -->
-<div id="questionnaire" class="screen">
+<!-- FORM -->
+<div id="form" class="screen">
+<div class="line glitch">KWESTIONARIUSZ</div>
 
-<div class="line glitch">FORMULARZ PRZYJĘCIA PERSONELU</div>
-<br>
+<input id="q_name" placeholder="Imię"><br><br>
+<input id="q_house" placeholder="Dom"><br><br>
+<input id="q_year" placeholder="Rok"><br><br>
 
-<label>Imię i nazwisko:</label><br>
-<input id="q_name"><br><br>
+<label><input type="checkbox" id="c1"> procedury</label><br>
+<label><input type="checkbox" id="c2"> anomalie</label><br>
+<label><input type="checkbox" id="c3"> ryzyko</label><br>
 
-<label>Dom / Frakcja:</label><br>
-<input id="q_house"><br><br>
-
-<label>Rok szkolenia:</label><br>
-<input id="q_year"><br><br>
-
-<br>
-
-<label><input type="checkbox" id="c1"> Akceptuję procedury</label><br>
-<label><input type="checkbox" id="c2"> Akceptuję anomalie</label><br>
-<label><input type="checkbox" id="c3"> Rozumiem ryzyko</label><br>
+<button onclick="submitForm()">ZATWIERDŹ</button>
 
 <br><br>
-
-<button onclick="submitQuestionnaire()">ZATWIERDŹ DOKUMENT</button>
-
-<br><br>
-<div id="q_result"></div>
-
-</div>
-
-<!-- ADMIN -->
-<div id="admin" class="screen">
-<div class="line glitch">PANEL ADMINISTRACYJNY</div>
-<br>
-<div id="adminList"></div>
-<br>
-<button onclick="closeAdmin()">ZAMKNIJ PANEL</button>
+<div id="out"></div>
 </div>
 
 <script>
 
-/* DATABASE */
-let recruits = JSON.parse(localStorage.getItem("recruits")) || [];
-
 let name="";
 let id=0;
+let recruits=JSON.parse(localStorage.getItem("recruits")||"[]");
+let outcome="neutral";
+
+/* NPC SYSTEM */
+let npcLines=[
+"// NADZORCA: obserwacja rozpoczęta",
+"// NADZORCA: analiza rekruta...",
+"// NADZORCA: dane niestabilne",
+"// NADZORCA: wszystko jest monitorowane",
+"// NADZORCA: nie ufaj odpowiedziom"
+];
 
 /* SCREEN */
 function show(s){
-    document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-    document.getElementById(s).classList.add("active");
+document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+document.getElementById(s).classList.add("active");
 }
 
 /* GLITCH */
-function glitchTransition(cb){
-
-    const o=document.getElementById("glitchOverlay");
-
-    let msgs=[
-        "SYSTEM ERROR",
-        "REALIGNING",
-        "ANOMALY DETECTED",
-        "REBUILDING",
-        "/// GLITCH ///"
-    ];
-
-    let i=0;
-
-    o.style.opacity=1;
-
-    let int=setInterval(()=>{
-        o.innerText=msgs[i++]||"/// GLITCH ///";
-    },120);
-
-    setTimeout(()=>{
-        clearInterval(int);
-        o.style.opacity=0;
-        cb();
-    },900);
+function glitch(cb){
+let o=document.getElementById("glitchOverlay");
+let t=["ERROR","CORRUPT","REALIGN","///","SYSTEM"];
+let i=0;
+o.style.opacity=1;
+let int=setInterval(()=>o.innerText=t[i++]||"///",120);
+setTimeout(()=>{clearInterval(int);o.style.opacity=0;cb();},800);
 }
 
-/* START */
-function startRecruit(){
-    glitchTransition(()=>show("recruit"));
-}
+function start(){glitch(()=>show("recruit"));}
 
-/* ID */
 function genID(){
-    return Math.floor(100000 + Math.random()*900000);
+return Math.floor(100000+Math.random()*900000);
 }
 
 /* RECRUIT */
 function submitRecruit(){
-
-    name=document.getElementById("name").value;
-    if(!name) return alert("Brak danych");
-
-    id=genID();
-
-    document.getElementById("result").innerHTML=
-        `<div class="line glitch">SUKCES</div>
-         <div class="line">REKRUT: ${name}</div>
-         <div class="line">ID: ${id}</div>`;
-
-    startLoading();
+name=document.getElementById("name").value;
+if(!name) return alert("Brak danych");
+id=genID();
+startLoading();
 }
 
-/* LOADING */
 function startLoading(){
-
-    show("loading");
-
-    let bar=document.getElementById("bar");
-    let txt=document.getElementById("loadingText");
-
-    let p=0;
-    let msgs=["tworzenie akt...","analiza...","ID przypisane...","weryfikacja..."];
-    let i=0;
-
-    let int=setInterval(()=>{
-
-        p+=5;
-        bar.style.width=p+"%";
-
-        if(p%25===0){
-            txt.innerText=msgs[i++]||"finalizacja...";
-        }
-
-        if(p>=100){
-            clearInterval(int);
-            showStamp();
-        }
-
-    },80);
+show("loading");
+let b=document.getElementById("bar");
+let p=0;
+let int=setInterval(()=>{
+p+=6;
+b.style.width=p+"%";
+if(p>=100){
+clearInterval(int);
+showStamp();
+}
+},60);
 }
 
-/* STAMP */
 function showStamp(){
-
-    glitchTransition(()=>show("stampScreen"));
-
-    setTimeout(()=>{
-        document.getElementById("stamp").style.opacity=1;
-    },1000);
-
-    setTimeout(()=>{
-        document.getElementById("systemInfo").innerHTML=
-            `<div class="line">REKRUT: ${name}</div>
-             <div class="line">ID: ${id}</div>
-             <div class="line">STATUS: PRZYJĘTY</div>`;
-    },400);
-
-    setTimeout(()=>{
-        glitchTransition(()=>show("questionnaire"));
-    },2800);
+glitch(()=>{
+show("stampScreen");
+document.getElementById("stamp").style.opacity=1;
+document.getElementById("info").innerHTML=
+`REKRUT: ${name}<br>ID: ${id}`;
+setTimeout(()=>glitch(()=>show("form")),2000);
+});
 }
 
-/* QUESTIONNAIRE + SAVE + DOWNLOAD */
-function submitQuestionnaire(){
+/* NPC MESSAGE */
+function npcMessage(type){
 
-    let qn=document.getElementById("q_name").value;
-    let h=document.getElementById("q_house").value;
-    let y=document.getElementById("q_year").value;
+if(type==="accepted") return "NADZORCA: rekrut zaakceptowany.";
+if(type==="rejected") return "NADZORCA: brak kompatybilności.";
+if(type==="anomaly") return "NADZORCA: wykryto anomalię danych.";
+if(type==="secret") return "NADZORCA: ...to nie powinno istnieć.";
 
-    let c1=document.getElementById("c1").checked;
-    let c2=document.getElementById("c2").checked;
-    let c3=document.getElementById("c3").checked;
+return "NADZORCA: obserwacja aktywna.";
+}
 
-    if(!qn||!h||!y){
-        alert("Uzupełnij dane");
-        return;
-    }
+/* FORM */
+function submitForm(){
 
-    /* SAVE ARCHIVE */
-    recruits.push({
-        name: qn,
-        house: h,
-        year: y,
-        c1, c2, c3,
-        id: id
-    });
+let qn=document.getElementById("q_name").value;
+let h=document.getElementById("q_house").value;
+let y=document.getElementById("q_year").value;
 
-    localStorage.setItem("recruits", JSON.stringify(recruits));
+let c1=document.getElementById("c1").checked;
+let c2=document.getElementById("c2").checked;
+let c3=document.getElementById("c3").checked;
 
-    /* CREATE FILE */
-    let doc = `
-<!DOCTYPE html>
+/* DEFAULT */
+outcome="accepted";
+
+/* REJECT */
+if(!qn||!h||!y){
+outcome="rejected";
+}
+
+/* RANDOM ANOMALY */
+if(Math.random()<0.2){
+outcome="anomaly";
+}
+
+/* SECRET PATH */
+if(c1&&c2&&c3){
+outcome="secret";
+}
+
+/* EASTER */
+if(qn.toLowerCase().includes("null")){
+outcome="secret";
+}
+
+/* SAVE */
+recruits.push({qn,h,y,c1,c2,c3,id,outcome});
+localStorage.setItem("recruits",JSON.stringify(recruits));
+
+/* NPC OUTPUT */
+document.getElementById("out").innerHTML=
+`<div class="line glitch">${npcMessage(outcome)}</div>`;
+
+/* RANDOM NPC OBSERVATION */
+setTimeout(()=>{
+document.getElementById("out").innerHTML+=
+`<div class="line">${npcLines[Math.floor(Math.random()*npcLines.length)]}</div>`;
+},800);
+
+/* DOCUMENT */
+let bg="#000",col="#00ff66";
+
+if(outcome==="rejected"){bg="#200";col="#ff4444";}
+if(outcome==="anomaly"){bg="#111";col="#ffaa00";}
+if(outcome==="secret"){bg="#000033";col="#66f";}
+
+let doc=`
 <html>
 <head>
-<meta charset="UTF-8">
-<title>AKTA REKRUTA</title>
 <style>
-body{background:black;color:#00ff66;font-family:Courier New;padding:40px;}
-.box{border:1px solid #00ff66;padding:20px;}
+body{
+background:${bg};
+color:${col};
+font-family:Courier New;
+padding:40px;
+}
+.box{border:1px solid ${col};padding:20px;}
 h1{text-shadow:2px 0 red,-2px 0 blue;}
+.npc{color:#888;font-style:italic;}
 </style>
 </head>
 <body>
@@ -344,69 +282,31 @@ REKRUT: ${qn}<br>
 DOM: ${h}<br>
 ROK: ${y}<br><br>
 
-PROCEDURY: ${c1?"TAK":"NIE"}<br>
-ANOMALIE: ${c2?"TAK":"NIE"}<br>
-RYZYKO: ${c3?"TAK":"NIE"}<br><br>
-
 ID: ${id}<br>
-STATUS: AKTYWNY
+OUTCOME: ${outcome}<br><br>
+
+PROCEDURY: ${c1}<br>
+ANOMALIE: ${c2}<br>
+RYZYKO: ${c3}<br>
+</div>
+
+<div class="npc">
+${npcMessage(outcome)}
 </div>
 
 </body>
 </html>
 `;
 
-    let blob=new Blob([doc],{type:"text/html"});
-    let url=URL.createObjectURL(blob);
+let blob=new Blob([doc],{type:"text/html"});
+let url=URL.createObjectURL(blob);
 
-    let a=document.createElement("a");
-    a.href=url;
-    a.download=`AKTA_${qn.replace(" ","_")}.html`;
-    a.click();
+let a=document.createElement("a");
+a.href=url;
+a.download="AKTA_"+qn+".html";
+a.click();
 
-    URL.revokeObjectURL(url);
-
-    document.getElementById("q_result").innerHTML=
-        `<div class="line glitch">DOKUMENT WYGENEROWANY</div>
-         <div class="line">ZAPISANO W ARCHIWUM</div>`;
-}
-
-/* ADMIN */
-function openAdmin(){
-
-    let pass=prompt("Kod dostępu:");
-
-    if(pass!=="BACKROOMS-0"){
-        alert("BRAK DOSTĘPU");
-        return;
-    }
-
-    show("admin");
-
-    let list=document.getElementById("adminList");
-
-    if(recruits.length===0){
-        list.innerHTML="<div class='line'>Brak rekrutów</div>";
-        return;
-    }
-
-    list.innerHTML=recruits.map(r=>`
-        <div class="line">
-        ---<br>
-        REKRUT: ${r.name}<br>
-        ID: ${r.id}<br>
-        DOM: ${r.house}<br>
-        ROK: ${r.year}<br>
-        PROCEDURY: ${r.c1}<br>
-        ANOMALIE: ${r.c2}<br>
-        RYZYKO: ${r.c3}<br>
-        ---
-        </div>
-    `).join("");
-}
-
-function closeAdmin(){
-    show("terminal");
+URL.revokeObjectURL(url);
 }
 
 </script>
