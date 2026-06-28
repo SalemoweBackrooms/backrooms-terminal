@@ -25,21 +25,12 @@ body{
     max-width:1000px;
 }
 
-.active{
-    display:block;
-}
+.active{display:block;}
 
-.line{
-    white-space:pre;
-    font-size:15px;
-    line-height:1.6;
-}
+.line{white-space:pre;font-size:15px;line-height:1.6;}
+.glitch{text-shadow:2px 0 red,-2px 0 blue;}
 
-.glitch{
-    text-shadow:2px 0 red,-2px 0 blue;
-}
-
-/* BUTTON */
+/* UI */
 button{
     margin-top:20px;
     background:black;
@@ -48,12 +39,8 @@ button{
     padding:10px;
     cursor:pointer;
 }
-button:hover{
-    background:#00ff66;
-    color:black;
-}
+button:hover{background:#00ff66;color:black;}
 
-/* INPUT */
 input{
     background:black;
     border:1px solid #00ff66;
@@ -62,17 +49,8 @@ input{
 }
 
 /* LOADING */
-.bar{
-    width:100%;
-    height:20px;
-    border:1px solid #00ff66;
-    margin-top:15px;
-}
-.fill{
-    height:100%;
-    width:0%;
-    background:#00ff66;
-}
+.bar{width:100%;height:20px;border:1px solid #00ff66;margin-top:15px;}
+.fill{height:100%;width:0%;background:#00ff66;}
 
 /* STAMP */
 .stamp{
@@ -107,12 +85,12 @@ input{
 
 <body>
 
-<!-- GLITCH OVERLAY -->
+<!-- GLITCH -->
 <div id="glitchOverlay">SYSTEM ERROR</div>
 
 <!-- TERMINAL -->
 <div id="terminal" class="screen active">
-<div class="line glitch">BACKROOMS SYSTEM v3</div>
+<div class="line glitch">BACKROOMS SYSTEM v4</div>
 <br>
 <div class="line">Łączenie z Level 0...</div>
 <div class="line">STATUS: OCZEKIWANIE NA REKRUTA</div>
@@ -164,21 +142,28 @@ input{
 <div class="line glitch">FORMULARZ PRZYJĘCIA PERSONELU</div>
 <br>
 
-<div class="line">Imię i nazwisko:</div>
-<div class="line">________________________</div>
+<label>Imię i nazwisko:</label><br>
+<input id="q_name"><br><br>
+
+<label>Dom / Frakcja:</label><br>
+<input id="q_house"><br><br>
+
+<label>Rok szkolenia:</label><br>
+<input id="q_year"><br><br>
+
 <br>
 
-<div class="line">Dom / Frakcja:</div>
-<div class="line">________________________</div>
-<br>
+<label><input type="checkbox" id="c1"> Akceptuję procedury</label><br>
+<label><input type="checkbox" id="c2"> Akceptuję anomalie</label><br>
+<label><input type="checkbox" id="c3"> Rozumiem ryzyko</label><br>
 
-<div class="line">Rok szkolenia:</div>
-<div class="line">________________________</div>
-<br>
+<br><br>
 
-<div class="line">☐ Akceptuję procedury</div>
-<div class="line">☐ Akceptuję anomalie</div>
-<div class="line">☐ Rozumiem ryzyko</div>
+<button onclick="submitQuestionnaire()">ZATWIERDŹ DOKUMENT</button>
+
+<br><br>
+
+<div id="q_result"></div>
 
 </div>
 
@@ -193,12 +178,12 @@ function show(screen){
     document.getElementById(screen).classList.add("active");
 }
 
-/* GLITCH TRANSITION */
+/* GLITCH */
 function glitchTransition(callback){
 
-    const overlay = document.getElementById("glitchOverlay");
+    const overlay=document.getElementById("glitchOverlay");
 
-    let msgs = [
+    let msgs=[
         "SYSTEM ERROR",
         "REALIGNING",
         "ANOMALY DETECTED",
@@ -206,17 +191,17 @@ function glitchTransition(callback){
         "/// GLITCH ///"
     ];
 
-    let i = 0;
+    let i=0;
 
-    overlay.style.opacity = 1;
+    overlay.style.opacity=1;
 
-    let interval = setInterval(()=>{
-        overlay.innerText = msgs[i++] || "/// GLITCH ///";
+    let int=setInterval(()=>{
+        overlay.innerText=msgs[i++]||"/// GLITCH ///";
     },120);
 
     setTimeout(()=>{
-        clearInterval(interval);
-        overlay.style.opacity = 0;
+        clearInterval(int);
+        overlay.style.opacity=0;
         callback();
     },900);
 }
@@ -231,15 +216,15 @@ function genID(){
     return Math.floor(100000 + Math.random()*900000);
 }
 
-/* SUBMIT */
+/* RECRUIT */
 function submitRecruit(){
 
-    name = document.getElementById("name").value;
+    name=document.getElementById("name").value;
     if(!name) return alert("Brak danych");
 
-    id = genID();
+    id=genID();
 
-    document.getElementById("result").innerHTML =
+    document.getElementById("result").innerHTML=
         `<div class="line glitch">SUKCES</div>
          <div class="line">REKRUT: ${name}</div>
          <div class="line">ID: ${id}</div>`;
@@ -256,12 +241,7 @@ function startLoading(){
     let txt=document.getElementById("loadingText");
 
     let p=0;
-    let msgs=[
-        "tworzenie akt...",
-        "analiza tożsamości...",
-        "przydzielanie ID...",
-        "weryfikacja anomalii..."
-    ];
+    let msgs=["tworzenie akt...","analiza...","ID przypisane...","weryfikacja..."];
     let i=0;
 
     let int=setInterval(()=>{
@@ -288,18 +268,47 @@ function showStamp(){
 
     setTimeout(()=>{
         document.getElementById("stamp").style.opacity=1;
-    },1200);
+    },1000);
 
     setTimeout(()=>{
-        document.getElementById("systemInfo").innerHTML =
+        document.getElementById("systemInfo").innerHTML=
             `<div class="line">REKRUT: ${name}</div>
              <div class="line">ID: ${id}</div>
              <div class="line">STATUS: PRZYJĘTY</div>`;
-    },500);
+    },400);
 
     setTimeout(()=>{
         glitchTransition(()=>show("questionnaire"));
-    },3000);
+    },2800);
+}
+
+/* QUESTIONNAIRE */
+function submitQuestionnaire(){
+
+    let qn=document.getElementById("q_name").value;
+    let h=document.getElementById("q_house").value;
+    let y=document.getElementById("q_year").value;
+
+    let c1=document.getElementById("c1").checked;
+    let c2=document.getElementById("c2").checked;
+    let c3=document.getElementById("c3").checked;
+
+    if(!qn||!h||!y){
+        alert("Uzupełnij dane");
+        return;
+    }
+
+    document.getElementById("q_result").innerHTML=
+        `<div class="line glitch">DOKUMENT ZATWIERDZONY</div>
+         <br>
+         <div class="line">REKRUT: ${qn}</div>
+         <div class="line">DOM: ${h}</div>
+         <div class="line">ROK: ${y}</div>
+         <div class="line">PROCEDURY: ${c1?"TAK":"NIE"}</div>
+         <div class="line">ANOMALIE: ${c2?"TAK":"NIE"}</div>
+         <div class="line">RYZYKO: ${c3?"TAK":"NIE"}</div>
+         <br>
+         <div class="line glitch">STATUS: AKTYWNY REKRUT BACKROOMS</div>`;
 }
 
 </script>
