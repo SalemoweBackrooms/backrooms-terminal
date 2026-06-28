@@ -9,6 +9,13 @@ let userID       = "";
 let fileHTML     = "";
 let quizStartTime = null;
 let playerName   = "";
+let playerGender = "I";
+
+function g(m, k, i) {
+  if (playerGender === "M") return m;
+  if (playerGender === "K") return k;
+  return i;
+}
 
 /* ═══════════════════════════════════════════════════
    AUDIO
@@ -78,7 +85,9 @@ const nameMsgs = [
   n => `${n}. Witaj w systemie.`,
   n => `${n} — dane zweryfikowane. Obserwacja aktywna.`,
   n => `Zidentyfikowano: ${n}. Nie uciekniesz.`,
-  n => `${n}… to imię było już w bazie.`,
+  n => `${n}\u2026 to imi\u0119 by\u0142o ju\u017c w bazie.`,
+  n => `${n} \u2014 ${g("obserwowany", "obserwowana", "podmiot obserwowany")} od momentu wej\u015bcia.`,
+  n => `${n}. ${g("Zidentyfikowany", "Zidentyfikowana", "Podmiot zidentyfikowany")}. Nadz\u00f3r aktywny.`,
 ];
 
 function getNadzorcaMsg() {
@@ -190,29 +199,30 @@ function validateForm() {
   const name    = document.getElementById("name").value.trim();
   const surname = document.getElementById("surname").value.trim();
   const age     = document.getElementById("age").value.trim();
+  const gender  = document.getElementById("gender").value;
   const role    = document.getElementById("role").value;
   const c1      = document.getElementById("c1").checked;
   const c2      = document.getElementById("c2").checked;
   const c3      = document.getElementById("c3").checked;
   const errEl   = document.getElementById("formError");
 
-  if (!name || !surname || !age || !role) {
+  if (!name || !surname || !age || !gender || !role) {
     showFormError(errEl, "[ERR] Niekompletne dane. System wymaga pełnych informacji.");
     return;
   }
 
   if (!c1 || !c2 || !c3) {
-    // Brak zgody — mroczniejsza reakcja systemu
     showFormError(errEl, "[ODMOWA] Zgoda wymagana. Bez niej nie wchodzisz.");
     glitch(true);
     playSafe("glitch");
     return;
   }
 
-  playerName = name; // zapisz imię do Nadzorcy
+  playerName   = name;
+  playerGender = gender;
   errEl.classList.add("hidden");
 
-  quizStartTime = Date.now(); // start timera quizu
+  quizStartTime = Date.now();
   document.getElementById("quizSubtitle").textContent =
     `Odpowiedz szczerze, ${name}. System weryfikuje zgodność.`;
 
@@ -353,6 +363,7 @@ function intervention() {
     `…nie wszyscy wychodzą stąd z dokumentem. Ty masz szczęście.`,
     `${house.label ? house.label + ". " : ""}System odnotował twój wybór.`,
     `${playerName}. ${house.motto || "System obserwuje."}`,
+    `${playerName} — ${g("obserwowany od wejścia", "obserwowana od wejścia", "podmiot obserwowany od wejścia")}.`,
   ];
 
   const el  = document.getElementById("nadzorcaMsg");
@@ -371,7 +382,7 @@ const HOUSES = {
     color2:  "#ffc500",
     label:   "GRYFFINDOR",
     crest:   "🦁",
-    title:   "Adept Magiczny",
+    title:   () => g("Adept Magiczny", "Adeptka Magiczna", "Adept Magiczny"),
     motto:   "Odwaga, odwaga, zawsze odwaga.",
     facts: [
       "Adepci Gryffindoru słyną z nieustraszoności — i nieprzemyślanych decyzji.",
@@ -385,7 +396,7 @@ const HOUSES = {
     color2:  "#372e29",
     label:   "HUFFLEPUFF",
     crest:   "🦡",
-    title:   "Adept Magiczny",
+    title:   () => g("Adept Magiczny", "Adeptka Magiczna", "Adept Magiczny"),
     motto:   "Lojalność jest rzadką magią.",
     facts: [
       "Hufflepuff wydał więcej Aurorów niż jakikolwiek inny dom — po cichu.",
@@ -399,7 +410,7 @@ const HOUSES = {
     color2:  "#946b2d",
     label:   "RAVENCLAW",
     crest:   "🦅",
-    title:   "Adept Magiczny",
+    title:   () => g("Adept Magiczny", "Adeptka Magiczna", "Adept Magiczny"),
     motto:   "Wiedza to jedyna magia, której nie można zabrać.",
     facts: [
       "Wejście do wieży Ravenclawu strzeże zagadka — nie hasło. Niektórzy czekają godzinami.",
@@ -413,7 +424,7 @@ const HOUSES = {
     color2:  "#aaaaaa",
     label:   "SLYTHERIN",
     crest:   "🐍",
-    title:   "Adept Magiczny",
+    title:   () => g("Adept Magiczny", "Adeptka Magiczna", "Adept Magiczny"),
     motto:   "Cel uświęca środki. System to potwierdza.",
     facts: [
       "Nie każdy ze Slytherinu jest zły. Ale system i tak ich obserwuje uważniej.",
@@ -450,7 +461,8 @@ function generateDocs() {
 
   userID = userID || generateID();
 
-  const house = HOUSES[roleKey] || HOUSES["Gryffindor"];
+  const _house = HOUSES[roleKey] || HOUSES["Gryffindor"];
+  const house = { ..._house, title: typeof _house.title === "function" ? _house.title() : _house.title };
   const fact  = house.facts[Math.floor(Math.random() * house.facts.length)];
 
   const quotes = [
@@ -462,177 +474,209 @@ function generateDocs() {
     "Jednostka nie wykazuje strachu. To niepokojące.",
   ];
 
+  const genderLabel = g("PODMIOT ANOMALICZNY", "PODMIOTKA ANOMALICZNA", "PODMIOT ANOMALICZNY");
+  const genderStable = g("PODMIOT STABILNY", "PODMIOTKA STABILNA", "PODMIOT STABILNY");
   const statusNote = status === "ANOMALY"
-    ? "PODMIOT ANOMALICZNY — podwyższony nadzór"
-    : "PODMIOT STABILNY — standardowy nadzór";
+    ? genderLabel + " — podwyższony nadzór"
+    : genderStable + " — standardowy nadzór";
 
   const quote = quotes[Math.floor(Math.random() * quotes.length)];
 
-  // Pasek domu — HTML inline
-  const houseBarHTML = `
-    <div style="
-      margin: 0 -28px 20px -28px;
-      padding: 10px 28px;
-      background: linear-gradient(90deg, ${house.color1}, ${house.color2});
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-family: 'Courier New', monospace;
-    ">
-      <span style="font-size:22px;">${house.crest}</span>
-      <span style="color:#fff; font-size:11px; font-weight:bold; letter-spacing:0.15em;">
-        ${house.label} &mdash; ${house.title}
-      </span>
-    </div>
+  // Wspólny CSS dokumentu — używany i na stronie i w pliku do pobrania
+  const sharedCSS = `
+    font-family:'Courier New',Courier,monospace;
+    font-size:13px;
+    line-height:1.8;
+    color:#1a1a1a;
   `;
+
+  const docHTML = buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote });
 
   const paper = document.getElementById("paper");
+  paper.style.cssText = "padding:0; overflow:hidden; position:relative;";
+  paper.innerHTML = docHTML;
 
-  paper.innerHTML = `
-    <div class="stamp">RECOVERED<br>FILE</div>
-    <div class="stamp2">BACKROOMS INSTITUTE<br>VERIFIED</div>
-
-    <h3>AKTA REKRUTA // SZKOŁA MAGII SALEM</h3>
-
-    ${houseBarHTML}
-
-    <p><b>ID:</b> ${userID}</p>
-    <p><b>IMIĘ:</b> ${name}</p>
-    <p><b>NAZWISKO:</b> ${surname}</p>
-    <p><b>WIEK:</b> ${age}</p>
-    <p><b>DOM / FUNKCJA:</b> ${house.label}</p>
-    <p><b>TYTUŁ:</b> ${house.title}</p>
-    <p><b>DATA REJESTRACJI:</b> ${date}</p>
-
-    <hr>
-
-    <p><b>STATUS:</b> ${status}</p>
-    <p><b>UWAGA:</b> ${statusNote}</p>
-
-    <hr>
-
-    <p><b>MOTTO:</b></p>
-    <p><i>"${house.motto}"</i></p>
-
-    <p style="margin-top:10px;"><b>NOTATKA SYSTEMOWA:</b></p>
-    <p style="font-size:12px;color:#444;">${fact}</p>
-
-    <hr>
-
-    <p><b>CYTAT NADZORCY:</b></p>
-    <p><i>"${quote}"</i></p>
-
-    <hr>
-
-    <p><b>REKOMENDACJA:</b> CONTINUOUS OBSERVATION</p>
-    <p style="font-size:11px;color:#888;margin-top:16px;">
-      Dokument wygenerowany automatycznie przez NADZORCA v.2026.0.<br>
-      Wszelkie próby edycji zostaną odnotowane.
-    </p>
-  `;
-
-  // Plik do pobrania — pełne style inline
+  // Plik do pobrania
   fileHTML = `<!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <title>AKTA // ${userID}</title>
 <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    margin: 0; padding: 40px;
-    background: #c8c0a8;
-    font-family: 'Courier New', Courier, monospace;
+    background: #b0a898;
+    padding: 40px 20px;
+    ${sharedCSS}
   }
-  .doc {
-    position: relative;
-    background: #ede8d3;
-    color: #1a1a1a;
-    padding: 30px 28px;
-    max-width: 620px;
+  .doc-wrap {
+    max-width: 640px;
     margin: 0 auto;
-    border: 1px solid #aaa;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
-    font-size: 13px;
-    line-height: 1.8;
+    background: #ede8d3;
+    border: 1px solid #999;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.35);
+    position: relative;
+    overflow: hidden;
   }
   .house-bar {
-    margin: 0 -28px 20px -28px;
-    padding: 10px 28px;
-    background: linear-gradient(90deg, ${house.color1}, ${house.color2});
-    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(90deg, ${house.color1} 0%, ${house.color2} 100%);
   }
-  .house-bar .crest { font-size: 22px; }
-  .house-bar .label { color: #fff; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; }
-  .stamp {
-    position: absolute; top: 16px; right: 20px;
-    border: 3px solid #8b0000; color: #8b0000;
+  .house-crest { font-size: 28px; line-height: 1; }
+  .house-info  { display: flex; flex-direction: column; }
+  .house-name  { color: #fff; font-size: 13px; font-weight: bold; letter-spacing: 0.18em; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+  .house-role  { color: rgba(255,255,255,0.75); font-size: 10px; letter-spacing: 0.12em; margin-top: 1px; }
+  .doc-body    { padding: 24px 28px 60px; }
+  .doc-title   { text-align: center; font-size: 13px; letter-spacing: 0.18em; font-weight: bold; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #aaa; }
+  .doc-title small { display: block; font-size: 10px; letter-spacing: 0.1em; color: #666; margin-top: 3px; font-weight: normal; }
+  .doc-section { margin: 14px 0; }
+  .doc-row     { display: flex; gap: 8px; margin: 4px 0; font-size: 12px; }
+  .doc-key     { min-width: 140px; color: #555; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
+  .doc-val     { color: #111; font-weight: bold; }
+  .doc-hr      { border: none; border-top: 1px solid #c0b89a; margin: 16px 0; }
+  .doc-label   { font-size: 10px; color: #888; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .doc-quote   { font-style: italic; color: #333; font-size: 12px; line-height: 1.7; padding-left: 10px; border-left: 2px solid #c0b89a; }
+  .doc-fact    { font-size: 11px; color: #555; line-height: 1.6; padding: 8px 10px; background: rgba(0,0,0,0.04); border-left: 2px solid ${house.color1}; }
+  .doc-motto   { font-size: 12px; color: #333; font-style: italic; padding-left: 10px; }
+  .doc-status  { display: inline-block; padding: 3px 10px; font-size: 11px; font-weight: bold; letter-spacing: 0.1em; border: 1px solid currentColor; }
+  .doc-status.anomaly { color: #8b0000; border-color: #8b0000; background: rgba(139,0,0,0.06); }
+  .doc-status.stable  { color: #1a472a; border-color: #1a472a; background: rgba(26,71,42,0.06); }
+  .doc-footer  { font-size: 10px; color: #999; margin-top: 18px; line-height: 1.6; }
+  .stamp-rec {
+    position: absolute; top: 80px; right: 18px;
+    border: 3px solid rgba(139,0,0,0.7); color: rgba(139,0,0,0.75);
     padding: 6px 10px; font-size: 10px; font-weight: bold;
-    letter-spacing: 0.1em; transform: rotate(-8deg);
-    opacity: 0.85; text-align: center; line-height: 1.4;
+    letter-spacing: 0.1em; transform: rotate(-7deg);
+    text-align: center; line-height: 1.5; pointer-events: none;
   }
-  .stamp2 {
-    position: absolute; bottom: 20px; left: 20px;
-    border: 3px solid #003b8e; color: #003b8e;
-    padding: 6px 10px; font-size: 10px; font-weight: bold;
-    letter-spacing: 0.08em; transform: rotate(3deg);
-    opacity: 0.8; line-height: 1.4;
+  .stamp-ver {
+    position: absolute; bottom: 18px; right: 20px;
+    border: 3px solid rgba(0,59,142,0.6); color: rgba(0,59,142,0.65);
+    padding: 5px 8px; font-size: 9px; font-weight: bold;
+    letter-spacing: 0.08em; transform: rotate(4deg);
+    text-align: center; line-height: 1.5; pointer-events: none;
   }
-  h3 {
-    font-size: 14px; letter-spacing: 0.12em; text-align: center;
-    margin-bottom: 16px; border-bottom: 1px solid #aaa; padding-bottom: 10px;
-  }
-  p { margin: 5px 0; }
-  hr { border: none; border-top: 1px solid #aaa; margin: 14px 0; }
 </style>
 </head>
 <body>
-<div class="doc">
-  <div class="stamp">RECOVERED<br>FILE</div>
-  <div class="stamp2">BACKROOMS INSTITUTE<br>VERIFIED</div>
-
-  <h3>AKTA REKRUTA // SZKOŁA MAGII SALEM</h3>
-
-  <div class="house-bar">
-    <span class="crest">${house.crest}</span>
-    <span class="label">${house.label} &mdash; ${house.title}</span>
-  </div>
-
-  <p><b>ID:</b> ${userID}</p>
-  <p><b>IMIĘ:</b> ${name}</p>
-  <p><b>NAZWISKO:</b> ${surname}</p>
-  <p><b>WIEK:</b> ${age}</p>
-  <p><b>DOM / FUNKCJA:</b> ${house.label}</p>
-  <p><b>TYTUŁ:</b> ${house.title}</p>
-  <p><b>DATA REJESTRACJI:</b> ${date}</p>
-
-  <hr>
-
-  <p><b>STATUS:</b> ${status}</p>
-  <p><b>UWAGA:</b> ${statusNote}</p>
-
-  <hr>
-
-  <p><b>MOTTO:</b></p>
-  <p><i>"${house.motto}"</i></p>
-
-  <p style="margin-top:10px;"><b>NOTATKA SYSTEMOWA:</b></p>
-  <p style="font-size:12px;color:#444;">${fact}</p>
-
-  <hr>
-
-  <p><b>CYTAT NADZORCY:</b></p>
-  <p><i>"${quote}"</i></p>
-
-  <hr>
-
-  <p><b>REKOMENDACJA:</b> CONTINUOUS OBSERVATION</p>
-  <p style="font-size:11px;color:#888;margin-top:16px;">
-    Dokument wygenerowany automatycznie przez NADZORCA v.2026.0.<br>
-    Wszelkie próby edycji zostaną odnotowane.
-  </p>
+<div class="doc-wrap">
+  ${docHTML}
 </div>
 </body>
 </html>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   BUILD DOC HTML (shared between screen + download)
+═══════════════════════════════════════════════════ */
+function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote }) {
+  const statusCls = status === "ANOMALY" ? "anomaly" : "stable";
+
+  return `
+  <style>
+    #paper * { box-sizing: border-box; }
+    .house-bar {
+      width: 100%; padding: 12px 24px;
+      display: flex; align-items: center; gap: 14px;
+      background: linear-gradient(90deg, ${house.color1} 0%, ${house.color2} 100%);
+    }
+    .house-crest { font-size: 28px; line-height: 1; }
+    .house-info  { display: flex; flex-direction: column; }
+    .house-name  { color: #fff; font-size: 13px; font-weight: bold; letter-spacing: 0.18em; text-shadow: 0 1px 3px rgba(0,0,0,0.5); font-family: 'Courier New', monospace; }
+    .house-role  { color: rgba(255,255,255,0.75); font-size: 10px; letter-spacing: 0.12em; margin-top: 1px; font-family: 'Courier New', monospace; }
+    .doc-body    { padding: 22px 26px 52px; font-family: 'Courier New', monospace; font-size: 13px; color: #1a1a1a; line-height: 1.8; position: relative; }
+    .doc-title   { text-align: center; font-size: 12px; letter-spacing: 0.2em; font-weight: bold; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid #bbb; }
+    .doc-title small { display: block; font-size: 10px; letter-spacing: 0.1em; color: #777; margin-top: 3px; font-weight: normal; }
+    .doc-row     { display: flex; gap: 8px; margin: 3px 0; font-size: 12px; }
+    .doc-key     { min-width: 150px; color: #666; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; padding-top: 1px; }
+    .doc-val     { color: #111; font-weight: bold; }
+    .doc-hr      { border: none; border-top: 1px solid #c8bfa0; margin: 14px 0; }
+    .doc-label   { font-size: 10px; color: #999; letter-spacing: 0.14em; text-transform: uppercase; margin: 12px 0 4px; }
+    .doc-quote   { font-style: italic; color: #333; font-size: 12px; line-height: 1.7; padding-left: 10px; border-left: 2px solid #c8bfa0; margin: 0; }
+    .doc-fact    { font-size: 11px; color: #555; line-height: 1.6; padding: 7px 10px; background: rgba(0,0,0,0.04); border-left: 3px solid ${house.color1}; margin: 4px 0 0; }
+    .doc-motto   { font-size: 12px; color: #333; font-style: italic; padding-left: 10px; margin: 0; }
+    .doc-status  { display: inline-block; padding: 2px 10px; font-size: 11px; font-weight: bold; letter-spacing: 0.1em; border: 1px solid currentColor; }
+    .doc-status.anomaly { color: #8b0000; border-color: #8b0000; background: rgba(139,0,0,0.06); }
+    .doc-status.stable  { color: #1a472a; border-color: #1a472a; background: rgba(26,71,42,0.06); }
+    .doc-footer  { font-size: 10px; color: #aaa; margin-top: 16px; line-height: 1.6; }
+    .stamp-rec {
+      position: absolute; top: 12px; right: 16px;
+      border: 3px solid rgba(139,0,0,0.65); color: rgba(139,0,0,0.7);
+      padding: 5px 8px; font-size: 9px; font-weight: bold;
+      letter-spacing: 0.1em; transform: rotate(-7deg);
+      text-align: center; line-height: 1.5;
+      font-family: 'Courier New', monospace;
+    }
+    .stamp-ver {
+      position: absolute; bottom: 16px; right: 18px;
+      border: 3px solid rgba(0,59,142,0.55); color: rgba(0,59,142,0.6);
+      padding: 4px 7px; font-size: 8px; font-weight: bold;
+      letter-spacing: 0.08em; transform: rotate(4deg);
+      text-align: center; line-height: 1.5;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+
+  <div class="house-bar">
+    <span class="house-crest">${house.crest}</span>
+    <div class="house-info">
+      <span class="house-name">${house.label}</span>
+      <span class="house-role">${house.title} &mdash; Szkoła Magii Salem</span>
+    </div>
+  </div>
+
+  <div class="doc-body">
+    <div class="stamp-rec">RECOVERED<br>FILE</div>
+    <div class="stamp-ver">BACKROOMS<br>INSTITUTE<br>VERIFIED</div>
+
+    <div class="doc-title">
+      AKTA REKRUTA
+      <small>NODE-0 // SYSTEM NADZORCA v.2026.0</small>
+    </div>
+
+    <div class="doc-row"><span class="doc-key">ID systemu</span><span class="doc-val">${userID}</span></div>
+    <div class="doc-row"><span class="doc-key">Imię</span><span class="doc-val">${name}</span></div>
+    <div class="doc-row"><span class="doc-key">Nazwisko</span><span class="doc-val">${surname}</span></div>
+    <div class="doc-row"><span class="doc-key">Wiek</span><span class="doc-val">${age}</span></div>
+    <div class="doc-row"><span class="doc-key">Dom</span><span class="doc-val">${house.label}</span></div>
+    <div class="doc-row"><span class="doc-key">Tytuł</span><span class="doc-val">${house.title}</span></div>
+    <div class="doc-row"><span class="doc-key">Data rejestracji</span><span class="doc-val">${date}</span></div>
+
+    <div class="doc-hr"></div>
+
+    <div class="doc-row">
+      <span class="doc-key">Status</span>
+      <span class="doc-val"><span class="doc-status ${statusCls}">${status}</span></span>
+    </div>
+    <div class="doc-row"><span class="doc-key">Uwaga</span><span class="doc-val" style="font-weight:normal;font-size:11px;">${statusNote}</span></div>
+
+    <div class="doc-hr"></div>
+
+    <div class="doc-label">Motto domu</div>
+    <p class="doc-motto">&ldquo;${house.motto}&rdquo;</p>
+
+    <div class="doc-label">Notatka systemowa</div>
+    <div class="doc-fact">${fact}</div>
+
+    <div class="doc-hr"></div>
+
+    <div class="doc-label">Cytat Nadzorcy</div>
+    <p class="doc-quote">&ldquo;${quote}&rdquo;</p>
+
+    <div class="doc-hr"></div>
+
+    <div class="doc-row"><span class="doc-key">Rekomendacja</span><span class="doc-val">CONTINUOUS OBSERVATION</span></div>
+
+    <p class="doc-footer">
+      Dokument wygenerowany automatycznie przez system NADZORCA v.2026.0.<br>
+      Wszelkie próby edycji zostaną odnotowane i przekazane do weryfikacji.
+    </p>
+  </div>`;
+}
 }
 
 /* ═══════════════════════════════════════════════════
