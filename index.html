@@ -18,13 +18,12 @@ body{
     overflow:hidden;
 }
 
-/* SCREEN SYSTEM */
+/* SCREENS */
 .screen{
     display:none;
     width:90%;
     max-width:1000px;
 }
-
 .active{display:block;}
 
 .line{white-space:pre;font-size:15px;line-height:1.6;}
@@ -65,7 +64,7 @@ input{
     font-weight:bold;
 }
 
-/* GLITCH OVERLAY */
+/* OVERLAY */
 #glitchOverlay{
     position:fixed;
     inset:0;
@@ -80,6 +79,11 @@ input{
     pointer-events:none;
     z-index:9999;
 }
+
+/* ADMIN */
+#adminList .line{
+    margin-bottom:15px;
+}
 </style>
 </head>
 
@@ -90,12 +94,13 @@ input{
 
 <!-- TERMINAL -->
 <div id="terminal" class="screen active">
-<div class="line glitch">BACKROOMS SYSTEM v4</div>
+<div class="line glitch">BACKROOMS SYSTEM v5</div>
 <br>
 <div class="line">Łączenie z Level 0...</div>
-<div class="line">STATUS: OCZEKIWANIE NA REKRUTA</div>
-<br>
+<div class="line">STATUS: OCZEKIWANIE</div>
+
 <button onclick="startRecruit()">WEJDŹ DO SYSTEMU</button>
+<button onclick="openAdmin()">SYSTEM ADMIN</button>
 </div>
 
 <!-- RECRUIT -->
@@ -118,20 +123,17 @@ input{
 <br>
 
 <div class="line" id="loadingText">inicjalizacja...</div>
-
 <div class="bar"><div class="fill" id="bar"></div></div>
 </div>
 
 <!-- STAMP -->
 <div id="stampScreen" class="screen">
-
 <div class="stamp" id="stamp">ZAAKCEPTOWANO</div>
 
 <div class="line glitch">SYSTEM REKRUTACYJNY</div>
 <br>
 
 <div id="systemInfo"></div>
-
 <br>
 <div class="line">PRZEKIEROWANIE DO KWESTIONARIUSZA...</div>
 </div>
@@ -162,26 +164,37 @@ input{
 <button onclick="submitQuestionnaire()">ZATWIERDŹ DOKUMENT</button>
 
 <br><br>
-
 <div id="q_result"></div>
 
 </div>
 
+<!-- ADMIN -->
+<div id="admin" class="screen">
+<div class="line glitch">PANEL ADMINISTRACYJNY</div>
+<br>
+<div id="adminList"></div>
+<br>
+<button onclick="closeAdmin()">ZAMKNIJ PANEL</button>
+</div>
+
 <script>
+
+/* DATABASE */
+let recruits = JSON.parse(localStorage.getItem("recruits")) || [];
 
 let name="";
 let id=0;
 
-/* SCREEN SWITCH */
-function show(screen){
-    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-    document.getElementById(screen).classList.add("active");
+/* SCREEN */
+function show(s){
+    document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+    document.getElementById(s).classList.add("active");
 }
 
 /* GLITCH */
-function glitchTransition(callback){
+function glitchTransition(cb){
 
-    const overlay=document.getElementById("glitchOverlay");
+    const o=document.getElementById("glitchOverlay");
 
     let msgs=[
         "SYSTEM ERROR",
@@ -193,16 +206,16 @@ function glitchTransition(callback){
 
     let i=0;
 
-    overlay.style.opacity=1;
+    o.style.opacity=1;
 
     let int=setInterval(()=>{
-        overlay.innerText=msgs[i++]||"/// GLITCH ///";
+        o.innerText=msgs[i++]||"/// GLITCH ///";
     },120);
 
     setTimeout(()=>{
         clearInterval(int);
-        overlay.style.opacity=0;
-        callback();
+        o.style.opacity=0;
+        cb();
     },900);
 }
 
@@ -282,7 +295,7 @@ function showStamp(){
     },2800);
 }
 
-/* QUESTIONNAIRE */
+/* QUESTIONNAIRE + SAVE + DOWNLOAD */
 function submitQuestionnaire(){
 
     let qn=document.getElementById("q_name").value;
@@ -298,17 +311,102 @@ function submitQuestionnaire(){
         return;
     }
 
+    /* SAVE ARCHIVE */
+    recruits.push({
+        name: qn,
+        house: h,
+        year: y,
+        c1, c2, c3,
+        id: id
+    });
+
+    localStorage.setItem("recruits", JSON.stringify(recruits));
+
+    /* CREATE FILE */
+    let doc = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AKTA REKRUTA</title>
+<style>
+body{background:black;color:#00ff66;font-family:Courier New;padding:40px;}
+.box{border:1px solid #00ff66;padding:20px;}
+h1{text-shadow:2px 0 red,-2px 0 blue;}
+</style>
+</head>
+<body>
+
+<h1>AKTA REKRUTA</h1>
+
+<div class="box">
+REKRUT: ${qn}<br>
+DOM: ${h}<br>
+ROK: ${y}<br><br>
+
+PROCEDURY: ${c1?"TAK":"NIE"}<br>
+ANOMALIE: ${c2?"TAK":"NIE"}<br>
+RYZYKO: ${c3?"TAK":"NIE"}<br><br>
+
+ID: ${id}<br>
+STATUS: AKTYWNY
+</div>
+
+</body>
+</html>
+`;
+
+    let blob=new Blob([doc],{type:"text/html"});
+    let url=URL.createObjectURL(blob);
+
+    let a=document.createElement("a");
+    a.href=url;
+    a.download=`AKTA_${qn.replace(" ","_")}.html`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+
     document.getElementById("q_result").innerHTML=
-        `<div class="line glitch">DOKUMENT ZATWIERDZONY</div>
-         <br>
-         <div class="line">REKRUT: ${qn}</div>
-         <div class="line">DOM: ${h}</div>
-         <div class="line">ROK: ${y}</div>
-         <div class="line">PROCEDURY: ${c1?"TAK":"NIE"}</div>
-         <div class="line">ANOMALIE: ${c2?"TAK":"NIE"}</div>
-         <div class="line">RYZYKO: ${c3?"TAK":"NIE"}</div>
-         <br>
-         <div class="line glitch">STATUS: AKTYWNY REKRUT BACKROOMS</div>`;
+        `<div class="line glitch">DOKUMENT WYGENEROWANY</div>
+         <div class="line">ZAPISANO W ARCHIWUM</div>`;
+}
+
+/* ADMIN */
+function openAdmin(){
+
+    let pass=prompt("Kod dostępu:");
+
+    if(pass!=="BACKROOMS-0"){
+        alert("BRAK DOSTĘPU");
+        return;
+    }
+
+    show("admin");
+
+    let list=document.getElementById("adminList");
+
+    if(recruits.length===0){
+        list.innerHTML="<div class='line'>Brak rekrutów</div>";
+        return;
+    }
+
+    list.innerHTML=recruits.map(r=>`
+        <div class="line">
+        ---<br>
+        REKRUT: ${r.name}<br>
+        ID: ${r.id}<br>
+        DOM: ${r.house}<br>
+        ROK: ${r.year}<br>
+        PROCEDURY: ${r.c1}<br>
+        ANOMALIE: ${r.c2}<br>
+        RYZYKO: ${r.c3}<br>
+        ---
+        </div>
+    `).join("");
+}
+
+function closeAdmin(){
+    show("terminal");
 }
 
 </script>
