@@ -23,7 +23,7 @@ function g(m, k, i) {
 document.addEventListener("click", () => {
   if (audioStarted) return;
   const hum = document.getElementById("hum");
-  hum.volume = 0.2;
+  hum.volume = 0.6;
   hum.play().catch(() => {});
   audioStarted = true;
 });
