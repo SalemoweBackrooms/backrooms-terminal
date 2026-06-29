@@ -883,18 +883,18 @@ function chatRespond(action) {
 
 function scheduleChatNext() {
   if (chatScheduled) clearTimeout(chatScheduled);
-  // co 45–90 sekund
-  const delay = 45000 + Math.random() * 45000;
+  // co 20–35 sekund
+  const delay = 20000 + Math.random() * 15000;
   chatScheduled = setTimeout(() => {
     if (!chatActive) showChat();
   }, delay);
 }
 
 function startChatSystem() {
-  // Pierwsze pojawienie się po ~20 sekundach
+  // Pierwsze pojawienie się po ~10 sekundach
   setTimeout(() => {
     if (!chatActive) showChat();
-  }, 20000);
+  }, 10000);
 }
 
 /* ═══════════════════════════════════════════════════
