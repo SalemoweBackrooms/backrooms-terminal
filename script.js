@@ -538,6 +538,8 @@ function generateDocs() {
 <meta charset="UTF-8">
 <title>AKTA // ${userID}</title>
 <style>
+  @import url('https://fonts.cdnfonts.com/css/scriptina-2');
+  @import url('https://fonts.cdnfonts.com/css/onesignature');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: #b0a898;
@@ -581,6 +583,9 @@ function generateDocs() {
   .doc-status.anomaly { color: #8b0000; border-color: #8b0000; background: rgba(139,0,0,0.06); }
   .doc-status.stable  { color: #1a472a; border-color: #1a472a; background: rgba(26,71,42,0.06); }
   .doc-footer  { font-size: 10px; color: #999; margin-top: 18px; line-height: 1.6; }
+  .doc-signatures { display: flex; gap: 30px; margin: 12px 0 8px; flex-wrap: wrap; }
+  .doc-sig-block  { flex: 1; min-width: 160px; border-top: 1px solid #c8bfa0; padding-top: 6px; }
+  .doc-sig-title  { font-size: 9px; color: #888; letter-spacing: 0.06em; line-height: 1.4; margin-top: 2px; }
   .stamp-rec {
     position: absolute; top: 80px; right: 18px;
     border: 3px solid rgba(139,0,0,0.7); color: rgba(139,0,0,0.75);
@@ -706,6 +711,20 @@ function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote
 
     <div class="doc-row"><span class="doc-key">Rekomendacja</span><span class="doc-val">CONTINUOUS OBSERVATION</span></div>
 
+    <div class="doc-hr"></div>
+
+    <div class="doc-label">Podpisy autoryzujące</div>
+    <div class="doc-signatures">
+      <div class="doc-sig-block">
+        <div class="doc-sig-name" style="font-family:'Scriptina',cursive; font-size:28px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nickolas Vogel</div>
+        <div class="doc-sig-title">Nickolas Vogel — Kierownik Kursu Orientacji</div>
+      </div>
+      <div class="doc-sig-block">
+        <div class="doc-sig-name" style="font-family:'OneSignature',cursive; font-size:32px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nicolas Cane</div>
+        <div class="doc-sig-title">Nicolas Cane — Prowadzący / Obrona przed Czarną Magią</div>
+      </div>
+    </div>
+
     <p class="doc-footer">
       Dokument wygenerowany automatycznie przez system NADZORCA v.2026.0.<br>
       Wszelkie próby edycji zostaną odnotowane i przekazane do weryfikacji.
@@ -734,14 +753,158 @@ function downloadFile() {
 }
 
 /* ═══════════════════════════════════════════════════
+   CHAT POPUP — Vogel & Cane
+═══════════════════════════════════════════════════ */
+const CHAT_MSGS = {
+  "Nickolas Vogel": [
+    "Witaj w Szkole Magii Salem. Twoja rejestracja została odnotowana. Jeśli masz pytania — nie zadawaj ich głośno.",
+    "Jestem Nickolas Vogel, prowadzący Kurs Orientacji. Proszę, nie dotykaj ścian w korytarzu B. To ważne.",
+    "System przypisał cię do właściwego domu. Nie kwestionuj tej decyzji. Domy wiedzą.",
+    "Czy czujesz się komfortowo przy terminalu? Pytam, bo… mamy zgłoszenia z tego sektora.",
+    "Kurs rozpoczyna się formalnie o 9:00. Ale Salem działa przez całą dobę. Zawsze.",
+    "Twoje akta wyglądają poprawnie. Mimo to sugeruję trzymać się oświetlonych korytarzy.",
+    "Proszę nie martwić się szumem. To normalne dla Poziomu 0. Większość się przyzwyczaja.",
+    "Pamiętaj: w Salem nie ma przypadkowych spotkań. Wszystko jest zaplanowane. Nawet to.",
+    "Twoje zaklęcia będą monitorowane przez pierwszych 30 dni. Dla twojego bezpieczeństwa.",
+    "Mamy nadzieję, że będziesz tu długo. Szkoła Salem rzadko wypuszcza kogoś przed końcem semestru.",
+  ],
+  "Nicolas Cane": [
+    "Hej. Nie wiem czy Vogel ci powiedział, ale sektor 7-C jest zamknięty. Nie pytaj dlaczego.",
+    "Widziałem twoje odpowiedzi w kwestionariuszu. Interesujące. Bardzo interesujące.",
+    "Jestem Nicolas Cane. Uczę Obrony przed Czarną Magią. I kilku innych rzeczy, których nie ma w programie.",
+    "Słyszysz to? Ten szum? Dobry znak. Znaczy że system cię już… zauważył.",
+    "Nie ufaj mapom Salem. Korytarze się przesuwają. Sam sprawdziłem.",
+    "Twój dom to dobry wybór. Albo dom wybrał ciebie. Trudno powiedzieć które.",
+    "Vogel jest optymistą. Ja jestem realistą. W Salem to duża różnica.",
+    "Jedna rada: jeśli zobaczysz drzwi, których wcześniej nie było — nie otwieraj ich. Nie tym razem.",
+    "Byłem na Poziomie 0 dłużej niż powinienem. Dlatego słyszę pewne rzeczy. Ty też zaczniesz.",
+    "Wszystko w porządku? Pytam bo terminal w tym sektorze ma historię. Niezbyt przyjemną.",
+  ],
+};
+
+// Wiadomości po "ignoruj" — system reaguje
+const IGNORE_NADZORCA = [
+  "Ignorowanie kadry jest odnotowane w aktach.",
+  "Brak odpowiedzi. Protokół obserwacji zaostrzony.",
+  "…ciekawy wybór. System zapamiętuje.",
+  "Nieodpowiednie zachowanie przy terminalu. Ostrzeżenie pierwsze.",
+];
+
+const IGNORE_FOLLOWUP = {
+  "Nickolas Vogel": [
+    "Rozumiem, że jesteś zajęty. Ale my mamy czas. Dużo czasu.",
+    "Ignorowanie wiadomości służbowych jest odnotowywane. Dla twojego dobra — odpowiedz.",
+  ],
+  "Nicolas Cane": [
+    "Ignorujesz mnie? Ciekawe. Większość tego nie robi. Dwa razy.",
+    "OK. Nie musisz odpowiadać. I tak już wiem co chciałem wiedzieć.",
+  ],
+};
+
+let chatActive   = false;
+let lastSender   = null;
+let chatScheduled = null;
+
+function getNextSender() {
+  const senders = Object.keys(CHAT_MSGS);
+  // naprzemiennie, ale z losowym przesunięciem
+  if (!lastSender) return Math.random() > 0.5 ? senders[0] : senders[1];
+  return lastSender === senders[0] ? senders[1] : senders[0];
+}
+
+function showChat(senderOverride, msgOverride) {
+  if (chatActive) return;
+
+  const sender = senderOverride || getNextSender();
+  const msgs   = CHAT_MSGS[sender];
+  const msg    = msgOverride || msgs[Math.floor(Math.random() * msgs.length)];
+
+  lastSender = sender;
+  chatActive = true;
+
+  const popup   = document.getElementById("chatPopup");
+  const senderEl = document.getElementById("chatSender");
+  const msgEl   = document.getElementById("chatMsg");
+
+  senderEl.textContent = sender.toUpperCase();
+  msgEl.textContent    = "";
+  popup.classList.remove("hidden", "closing");
+
+  // Typewriter w okienku
+  typewriterEl(msgEl, msg, 30, () => {});
+
+  // Auto-zaplanuj następną wiadomość
+  scheduleChatNext();
+}
+
+function closeChat(withGlitch) {
+  const popup = document.getElementById("chatPopup");
+  popup.classList.add("closing");
+  if (withGlitch) glitch(true);
+  setTimeout(() => {
+    popup.classList.add("hidden");
+    popup.classList.remove("closing");
+    chatActive = false;
+  }, 280);
+}
+
+function chatRespond(action) {
+  if (action === "ok") {
+    closeChat(false);
+  }
+  else if (action === "nie") {
+    closeChat(true);
+    playSafe("glitch");
+  }
+  else if (action === "ignoruj") {
+    closeChat(false);
+
+    const roll = Math.random();
+    if (roll > 0.6) {
+      // Nadzorca komentuje
+      setTimeout(() => {
+        const el  = document.getElementById("nadzorca");
+        const msg = IGNORE_NADZORCA[Math.floor(Math.random() * IGNORE_NADZORCA.length)];
+        el.classList.add("alert");
+        typewriterEl(el, "NADZORCA: " + msg, 28, () => {});
+        glitch(true);
+        playSafe("glitch");
+      }, 800);
+    } else {
+      // Drugi prowadzący odpowiada od razu
+      setTimeout(() => {
+        const followMsgs = IGNORE_FOLLOWUP[lastSender];
+        const msg = followMsgs[Math.floor(Math.random() * followMsgs.length)];
+        showChat(lastSender, msg);
+      }, 1800);
+    }
+  }
+}
+
+function scheduleChatNext() {
+  if (chatScheduled) clearTimeout(chatScheduled);
+  // co 45–90 sekund
+  const delay = 45000 + Math.random() * 45000;
+  chatScheduled = setTimeout(() => {
+    if (!chatActive) showChat();
+  }, delay);
+}
+
+function startChatSystem() {
+  // Pierwsze pojawienie się po ~20 sekundach
+  setTimeout(() => {
+    if (!chatActive) showChat();
+  }, 20000);
+}
+
+/* ═══════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════ */
 window.onload = () => {
   runBoot();
   nadzorcaTick();
+  startChatSystem();
 
-  // Podmień ekran INTRO po załadowaniu
-  // (runIntro jest wywoływane po przejściu z boot)
   const origShow = show;
   window.show = function(id) {
     origShow(id);
