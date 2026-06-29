@@ -23,7 +23,7 @@
 
 <!-- INTRO -->
 <section id="intro" class="screen">
-  <h2 class="flicker">NADZORCA AI // v.2026.0</h2>
+  <h2 class="flicker">NADZORCA // v.2026.0</h2>
   <p id="introText" class="typewriter"></p>
   <button id="introBtn" class="hidden" onclick="next('form')">► KONTYNUUJ</button>
 </section>
@@ -34,13 +34,13 @@
   <p class="subtitle">Wypełnij formularz zgodnie z prawdą. System weryfikuje.</p>
 
   <label>IMIĘ</label>
-  <input id="name" placeholder="..." autocomplete="off" spellcheck="false">
+  <input id="name" placeholder="..." autocomplete="off" spellcheck="false" maxlength="30">
 
   <label>NAZWISKO</label>
-  <input id="surname" placeholder="..." autocomplete="off" spellcheck="false">
+  <input id="surname" placeholder="..." autocomplete="off" spellcheck="false" maxlength="30">
 
   <label>WIEK</label>
-  <input id="age" placeholder="..." type="number" min="1" max="99">
+  <input id="age" placeholder="..." type="number" min="1" max="99" maxlength="2" oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
 
   <label>KLASYFIKACJA PODMIOTU</label>
   <select id="gender">
@@ -53,11 +53,11 @@
   <label>DOM / FUNKCJA</label>
   <select id="role">
     <option value="" disabled selected>— wybierz —</option>
-    <option value="Gryffindor">⚔ Gryffindor — Adept Magiczny</option>
-    <option value="Hufflepuff">🌿 Hufflepuff — Adept Magiczny</option>
-    <option value="Ravenclaw">📖 Ravenclaw — Adept Magiczny</option>
+    <option value="Gryffindor">🦁 Gryffindor — Adept Magiczny</option>
+    <option value="Hufflepuff">🦡 Hufflepuff — Adept Magiczny</option>
+    <option value="Ravenclaw">🦅 Ravenclaw — Adept Magiczny</option>
     <option value="Slytherin">🐍 Slytherin — Adept Magiczny</option>
-    <option value="Nauczyciel">✦ Nauczyciel / Kadra Salem</option>
+    <option value="Nauczyciel">📖 Nauczyciel / Kadra Salem</option>
   </select>
 
   <div class="divider"></div>
@@ -108,6 +108,27 @@
       <option value="" disabled selected>— wybierz —</option>
       <option>TAK</option>
       <option>NIE</option>
+    </select>
+  </div>
+
+
+  <div class="question-block">
+    <p>04 &mdash; Czy zdarzyło ci się wykonać zaklęcie, którego nie pamiętasz?</p>
+    <select id="q4">
+      <option value="" disabled selected>— wybierz —</option>
+      <option>TAK</option>
+      <option>NIE</option>
+      <option>NIE JESTEM PEWIEN / PEWNA</option>
+    </select>
+  </div>
+
+  <div class="question-block">
+    <p>05 &mdash; Czy korytarze Szkoły Salem wydają ci się dłuższe niż powinny?</p>
+    <select id="q5">
+      <option value="" disabled selected>— wybierz —</option>
+      <option>TAK</option>
+      <option>NIE</option>
+      <option>ZAWSZE TAK BYŁO</option>
     </select>
   </div>
 
