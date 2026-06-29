@@ -452,3 +452,132 @@ button:active {
   90%  { opacity: 1; }
   100% { background-position: 0% 100%; opacity: 0; }
 }
+
+/* ─── CHAT POPUP ────────────────────────────────────── */
+.chat-popup {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 300px;
+  background: #0a0a0a;
+  border: 1px solid var(--green-dark);
+  border-left: 3px solid var(--green);
+  box-shadow: 0 0 20px rgba(0,255,157,0.1), 4px 4px 0 rgba(0,0,0,0.5);
+  z-index: 700;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  animation: chatSlideIn 0.3s ease forwards;
+}
+
+.chat-popup.hidden {
+  display: none !important;
+}
+
+.chat-popup.closing {
+  animation: chatSlideOut 0.25s ease forwards;
+}
+
+@keyframes chatSlideIn {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes chatSlideOut {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(120%); opacity: 0; }
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 12px;
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--green-dark);
+}
+
+.chat-sender {
+  color: var(--green);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+}
+
+.chat-status {
+  color: var(--green-dim);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  animation: blink 2s step-end infinite;
+}
+
+.chat-body {
+  padding: 12px 14px;
+  min-height: 60px;
+}
+
+.chat-msg {
+  color: var(--green-dim);
+  line-height: 1.7;
+  font-size: 12px;
+  margin: 0;
+}
+
+.chat-actions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--green-dark);
+}
+
+.chat-btn {
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  background: transparent;
+  cursor: pointer;
+  flex: 1;
+  transition: background 0.15s, color 0.15s;
+}
+
+.chat-btn:hover {
+  background: var(--green-dark);
+  color: var(--green);
+  box-shadow: none;
+}
+
+.chat-btn-ignore {
+  border-color: #331a00;
+  color: #664400;
+}
+
+.chat-btn-ignore:hover {
+  background: #1a0d00;
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+/* ─── PODPISY NA AKCIE ──────────────────────────────── */
+.doc-signatures {
+  display: flex;
+  gap: 30px;
+  margin: 12px 0 8px;
+  flex-wrap: wrap;
+}
+
+.doc-sig-block {
+  flex: 1;
+  min-width: 160px;
+  border-top: 1px solid #c8bfa0;
+  padding-top: 6px;
+}
+
+.doc-sig-title {
+  font-size: 9px;
+  color: #888;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  margin-top: 2px;
+}
