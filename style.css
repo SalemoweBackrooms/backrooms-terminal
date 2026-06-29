@@ -444,3 +444,11 @@ button:active {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--green-dark); }
+
+/* ─── SCAN SWEEP GLITCH ─────────────────────────────── */
+@keyframes scanSweepAnim {
+  0%   { background-position: 0% 0%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { background-position: 0% 100%; opacity: 0; }
+}
