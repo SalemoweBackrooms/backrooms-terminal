@@ -33,6 +33,9 @@ function playSafe(id) {
   if (!a) return;
   a.pause();
   a.currentTime = 0;
+  if (id === "hum")      a.volume = 0.05;
+  if (id === "glitch")   a.volume = 0.08;
+  if (id === "activity") a.volume = 0.10;
   a.play().catch(() => {});
 }
 
@@ -104,13 +107,41 @@ function getNadzorcaMsg() {
   return "NADZORCA: " + msg;
 }
 
+function glitchScanSweep() {
+  const sweep = document.createElement("div");
+  sweep.style.cssText = `
+    position:fixed; inset:0; z-index:960; pointer-events:none;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0,255,100,0.04) 48%,
+      rgba(255,0,0,0.07) 50%,
+      rgba(0,255,100,0.04) 52%,
+      transparent 100%
+    );
+    background-size: 100% 200%;
+    animation: scanSweepAnim 0.6s linear forwards;
+  `;
+  document.body.appendChild(sweep);
+  setTimeout(() => sweep.remove(), 700);
+}
+
+function glitchRedShift() {
+  document.body.style.textShadow = "2px 0 #ff0000, -2px 0 #00ffff";
+  setTimeout(() => { document.body.style.textShadow = ""; }, 120);
+}
+
 function nadzorcaTick() {
   const el = document.getElementById("nadzorca");
   const msg = getNadzorcaMsg();
   el.classList.remove("alert");
 
-  // co jakiś czas "alert" — czerwony
   if (Math.random() > 0.75) el.classList.add("alert");
+
+  // losowy dodatkowy efekt horror
+  const roll = Math.random();
+  if (roll > 0.82) glitchScanSweep();
+  else if (roll > 0.70) glitchRedShift();
 
   typewriterEl(el, msg, 28, () => {});
   setTimeout(nadzorcaTick, 9000 + Math.random() * 6000);
@@ -167,19 +198,18 @@ function runBoot() {
 
       // po ostatniej linii — czekamy na klik
       if (linesShown === bootLines.length) {
-        document.addEventListener("keydown", bootProceed);
-        document.addEventListener("click",   bootProceed);
+        document.addEventListener("keydown", bootProceed, { once: true });
+        document.addEventListener("click",   bootProceed, { once: true });
       }
     }, delay);
   });
 }
 
 let bootDone = false;
-
 function bootProceed() {
   if (bootDone) return;
   bootDone = true;
-  document.removeEventListener("click",   bootProceed);
+  document.removeEventListener("click", bootProceed);
   document.removeEventListener("keydown", bootProceed);
   glitch(true);
   setTimeout(() => next("intro"), 350);
@@ -249,10 +279,12 @@ function validateQuiz() {
   const q1 = document.getElementById("q1").value;
   const q2 = document.getElementById("q2").value;
   const q3 = document.getElementById("q3").value;
+  const q4 = document.getElementById("q4").value;
+  const q5 = document.getElementById("q5").value;
   const errEl   = document.getElementById("quizError");
   const timerEl = document.getElementById("quizTimer");
 
-  if (!q1 || !q2 || !q3) {
+  if (!q1 || !q2 || !q3 || !q4 || !q5) {
     errEl.classList.remove("hidden");
     glitch();
     return;
@@ -269,25 +301,27 @@ function validateQuiz() {
     // Zmuś czekać jeszcze chwilę
     setTimeout(() => {
       timerEl.classList.add("hidden");
-      analyze(q1, q2, q3);
+      analyze(q1, q2, q3, q4, q5);
     }, 2500);
     return;
   }
 
   timerEl.classList.add("hidden");
-  analyze(q1, q2, q3);
+  analyze(q1, q2, q3, q4, q5);
 }
 
 /* ═══════════════════════════════════════════════════
    ANALYZE
 ═══════════════════════════════════════════════════ */
-function analyze(q1, q2, q3) {
+function analyze(q1, q2, q3, q4, q5) {
   const score =
     (q1 === "TAK" ? 1 : 0) +
     (q2 === "TAK" ? 1 : 0) +
-    (q3 === "TAK" ? 1 : 0);
+    (q3 === "TAK" ? 1 : 0) +
+    (q4 === "TAK" || q4 === "NIE JESTEM PEWIEN / PEWNA" ? 1 : 0) +
+    (q5 === "TAK" || q5 === "ZAWSZE TAK BYŁO" ? 1 : 0);
 
-  status = score >= 2 ? "ANOMALY" : "STABLE";
+  status = score >= 3 ? "ANOMALY" : "STABLE";
   userID = generateID();
 
   show("loading");
@@ -443,7 +477,7 @@ const HOUSES = {
     color1:  "#3b1f5e",
     color2:  "#c9a0dc",
     label:   "KADRA SALEM",
-    crest:   "✦",
+    crest:   "📖",
     title:   "Nauczyciel / Kadra",
     motto:   "Uczysz magii. System uczy ciebie.",
     facts: [
@@ -509,6 +543,8 @@ function generateDocs() {
 <meta charset="UTF-8">
 <title>AKTA // ${userID}</title>
 <style>
+  @import url('https://fonts.cdnfonts.com/css/scriptina-2');
+  @import url('https://fonts.cdnfonts.com/css/onesignature');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: #b0a898;
@@ -552,6 +588,9 @@ function generateDocs() {
   .doc-status.anomaly { color: #8b0000; border-color: #8b0000; background: rgba(139,0,0,0.06); }
   .doc-status.stable  { color: #1a472a; border-color: #1a472a; background: rgba(26,71,42,0.06); }
   .doc-footer  { font-size: 10px; color: #999; margin-top: 18px; line-height: 1.6; }
+  .doc-signatures { display: flex; gap: 30px; margin: 12px 0 8px; flex-wrap: wrap; }
+  .doc-sig-block  { flex: 1; min-width: 160px; border-top: 1px solid #c8bfa0; padding-top: 6px; }
+  .doc-sig-title  { font-size: 9px; color: #888; letter-spacing: 0.06em; line-height: 1.4; margin-top: 2px; }
   .stamp-rec {
     position: absolute; top: 80px; right: 18px;
     border: 3px solid rgba(139,0,0,0.7); color: rgba(139,0,0,0.75);
@@ -677,6 +716,20 @@ function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote
 
     <div class="doc-row"><span class="doc-key">Rekomendacja</span><span class="doc-val">CONTINUOUS OBSERVATION</span></div>
 
+    <div class="doc-hr"></div>
+
+    <div class="doc-label">Podpisy autoryzujące</div>
+    <div class="doc-signatures">
+      <div class="doc-sig-block">
+        <div class="doc-sig-name" style="font-family:'Scriptina',cursive; font-size:28px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nickolas Vogel</div>
+        <div class="doc-sig-title">Nickolas Vogel — Prowadzący Kurs</div>
+      </div>
+      <div class="doc-sig-block">
+        <div class="doc-sig-name" style="font-family:'OneSignature',cursive; font-size:32px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nicolas Cane</div>
+        <div class="doc-sig-title">Nicolas Cane — Prowadzący Kurs</div>
+      </div>
+    </div>
+
     <p class="doc-footer">
       Dokument wygenerowany automatycznie przez system NADZORCA v.2026.0.<br>
       Wszelkie próby edycji zostaną odnotowane i przekazane do weryfikacji.
@@ -689,11 +742,164 @@ function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote
 ═══════════════════════════════════════════════════ */
 function downloadFile() {
   if (!fileHTML) { alert("FILE NOT READY"); return; }
-  const blob = new Blob([fileHTML], { type: "text/html" });
-  const a    = document.createElement("a");
-  a.href     = URL.createObjectURL(blob);
-  a.download = `BACKROOMS_AKTA_${userID}.html`;
-  a.click();
+  const win = window.open("", "_blank");
+  win.document.write(fileHTML.replace("</head>", `<style>
+    @media print {
+      body { background: #b0a898 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 400);
+    };
+  <\/script>
+  </head>`));
+  win.document.close();
+}
+
+/* ═══════════════════════════════════════════════════
+   CHAT POPUP — Vogel & Cane
+═══════════════════════════════════════════════════ */
+const CHAT_MSGS = {
+  "Nickolas Vogel": [
+    "Witaj w Szkole Magii Salem. Twoja rejestracja została odnotowana. Jeśli masz pytania — nie zadawaj ich głośno.",
+    "Jestem Nickolas Vogel, prowadzący Kurs. Proszę, nie dotykaj ścian w korytarzu B. To ważne.",
+    "System przypisał cię do właściwego domu. Nie kwestionuj tej decyzji. Domy wiedzą.",
+    "Czy czujesz się komfortowo przy terminalu? Pytam, bo… mamy zgłoszenia z tego sektora.",
+    "Kurs rozpoczyna się formalnie o 19:20. Ale Salem działa przez całą dobę. Zawsze.",
+    "Twoje akta wyglądają poprawnie. Mimo to sugeruję trzymać się oświetlonych korytarzy.",
+    "Proszę nie martwić się szumem. To normalne dla Poziomu 0. Większość się przyzwyczaja.",
+    "Pamiętaj: w Salem nie ma przypadkowych spotkań. Wszystko jest zaplanowane. Nawet to.",
+    "Twoje zaklęcia będą monitorowane przez pierwszych 30 dni. Dla twojego bezpieczeństwa.",
+    "Mamy nadzieję, że będziesz tu długo. Szkoła Salem rzadko wypuszcza kogoś przed końcem semestru.",
+  ],
+  "Nicolas Cane": [
+    "Hej. Nie wiem czy Vogel ci powiedział, ale sektor 7-C jest zamknięty. Nie pytaj dlaczego.",
+    "Widziałem twoje odpowiedzi w kwestionariuszu. Interesujące. Bardzo interesujące.",
+    "Jestem Nicolas Cane. Uczę o Salemowym Backrooms. I kilku innych rzeczy, których nie ma w programie.",
+    "Słyszysz to? Ten szum? Dobry znak. Znaczy że system cię już… zauważył.",
+    "Nie ufaj mapom Salem. Korytarze się przesuwają. Sam sprawdziłem.",
+    "Twój dom to dobry wybór. Albo dom wybrał ciebie. Trudno powiedzieć które.",
+    "Vogel jest optymistą. Ja jestem realistą. W Salem to duża różnica.",
+    "Jedna rada: jeśli zobaczysz drzwi, których wcześniej nie było — nie otwieraj ich. Nie tym razem.",
+    "Byłem na Poziomie 0 dłużej niż powinienem. Dlatego słyszę pewne rzeczy. Ty też zaczniesz.",
+    "Wszystko w porządku? Pytam bo terminal w tym sektorze ma historię. Niezbyt przyjemną.",
+  ],
+};
+
+// Wiadomości po "ignoruj" — system reaguje
+const IGNORE_NADZORCA = [
+  "Ignorowanie kadry jest odnotowane w aktach.",
+  "Brak odpowiedzi. Protokół obserwacji zaostrzony.",
+  "…ciekawy wybór. System zapamiętuje.",
+  "Nieodpowiednie zachowanie przy terminalu. Ostrzeżenie pierwsze.",
+];
+
+const IGNORE_FOLLOWUP = {
+  "Nickolas Vogel": [
+    "Rozumiem, że jesteś zajęty. Ale my mamy czas. Dużo czasu.",
+    "Ignorowanie wiadomości służbowych jest odnotowywane. Dla twojego dobra — odpowiedz.",
+  ],
+  "Nicolas Cane": [
+    "Ignorujesz mnie? Ciekawe. Większość tego nie robi. Dwa razy.",
+    "OK. Nie musisz odpowiadać. I tak już wiem co chciałem wiedzieć.",
+  ],
+};
+
+let chatActive   = false;
+let lastSender   = null;
+let chatScheduled = null;
+
+function getNextSender() {
+  const senders = Object.keys(CHAT_MSGS);
+  // naprzemiennie, ale z losowym przesunięciem
+  if (!lastSender) return Math.random() > 0.5 ? senders[0] : senders[1];
+  return lastSender === senders[0] ? senders[1] : senders[0];
+}
+
+function showChat(senderOverride, msgOverride) {
+  if (chatActive) return;
+
+  const sender = senderOverride || getNextSender();
+  const msgs   = CHAT_MSGS[sender];
+  const msg    = msgOverride || msgs[Math.floor(Math.random() * msgs.length)];
+
+  lastSender = sender;
+  chatActive = true;
+
+  const popup   = document.getElementById("chatPopup");
+  const senderEl = document.getElementById("chatSender");
+  const msgEl   = document.getElementById("chatMsg");
+
+  senderEl.textContent = sender.toUpperCase();
+  msgEl.textContent    = "";
+  popup.classList.remove("hidden", "closing");
+
+  // Typewriter w okienku
+  typewriterEl(msgEl, msg, 30, () => {});
+
+  // Auto-zaplanuj następną wiadomość
+  scheduleChatNext();
+}
+
+function closeChat(withGlitch) {
+  const popup = document.getElementById("chatPopup");
+  popup.classList.add("closing");
+  if (withGlitch) glitch(true);
+  setTimeout(() => {
+    popup.classList.add("hidden");
+    popup.classList.remove("closing");
+    chatActive = false;
+  }, 280);
+}
+
+function chatRespond(action) {
+  if (action === "ok") {
+    closeChat(false);
+  }
+  else if (action === "nie") {
+    closeChat(true);
+    playSafe("glitch");
+  }
+  else if (action === "ignoruj") {
+    closeChat(false);
+
+    const roll = Math.random();
+    if (roll > 0.6) {
+      // Nadzorca komentuje
+      setTimeout(() => {
+        const el  = document.getElementById("nadzorca");
+        const msg = IGNORE_NADZORCA[Math.floor(Math.random() * IGNORE_NADZORCA.length)];
+        el.classList.add("alert");
+        typewriterEl(el, "NADZORCA: " + msg, 28, () => {});
+        glitch(true);
+        playSafe("glitch");
+      }, 800);
+    } else {
+      // Drugi prowadzący odpowiada od razu
+      setTimeout(() => {
+        const followMsgs = IGNORE_FOLLOWUP[lastSender];
+        const msg = followMsgs[Math.floor(Math.random() * followMsgs.length)];
+        showChat(lastSender, msg);
+      }, 1800);
+    }
+  }
+}
+
+function scheduleChatNext() {
+  if (chatScheduled) clearTimeout(chatScheduled);
+  // co 20–35 sekund
+  const delay = 20000 + Math.random() * 15000;
+  chatScheduled = setTimeout(() => {
+    if (!chatActive) showChat();
+  }, delay);
+}
+
+function startChatSystem() {
+  // Pierwsze pojawienie się po ~10 sekundach
+  setTimeout(() => {
+    if (!chatActive) showChat();
+  }, 10000);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -702,9 +908,8 @@ function downloadFile() {
 window.onload = () => {
   runBoot();
   nadzorcaTick();
+  startChatSystem();
 
-  // Podmień ekran INTRO po załadowaniu
-  // (runIntro jest wywoływane po przejściu z boot)
   const origShow = show;
   window.show = function(id) {
     origShow(id);
