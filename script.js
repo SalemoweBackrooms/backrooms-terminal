@@ -717,11 +717,11 @@ function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote
     <div class="doc-signatures">
       <div class="doc-sig-block">
         <div class="doc-sig-name" style="font-family:'Scriptina',cursive; font-size:28px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nickolas Vogel</div>
-        <div class="doc-sig-title">Nickolas Vogel — Kierownik Kursu Orientacji</div>
+        <div class="doc-sig-title">Nickolas Vogel — Prowadzący Kurs</div>
       </div>
       <div class="doc-sig-block">
         <div class="doc-sig-name" style="font-family:'OneSignature',cursive; font-size:32px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nicolas Cane</div>
-        <div class="doc-sig-title">Nicolas Cane — Prowadzący / Obrona przed Czarną Magią</div>
+        <div class="doc-sig-title">Nicolas Cane — Prowadzący Kurs</div>
       </div>
     </div>
 
@@ -758,10 +758,10 @@ function downloadFile() {
 const CHAT_MSGS = {
   "Nickolas Vogel": [
     "Witaj w Szkole Magii Salem. Twoja rejestracja została odnotowana. Jeśli masz pytania — nie zadawaj ich głośno.",
-    "Jestem Nickolas Vogel, prowadzący Kurs Orientacji. Proszę, nie dotykaj ścian w korytarzu B. To ważne.",
+    "Jestem Nickolas Vogel, prowadzący Kurs. Proszę, nie dotykaj ścian w korytarzu B. To ważne.",
     "System przypisał cię do właściwego domu. Nie kwestionuj tej decyzji. Domy wiedzą.",
     "Czy czujesz się komfortowo przy terminalu? Pytam, bo… mamy zgłoszenia z tego sektora.",
-    "Kurs rozpoczyna się formalnie o 9:00. Ale Salem działa przez całą dobę. Zawsze.",
+    "Kurs rozpoczyna się formalnie o 19:20. Ale Salem działa przez całą dobę. Zawsze.",
     "Twoje akta wyglądają poprawnie. Mimo to sugeruję trzymać się oświetlonych korytarzy.",
     "Proszę nie martwić się szumem. To normalne dla Poziomu 0. Większość się przyzwyczaja.",
     "Pamiętaj: w Salem nie ma przypadkowych spotkań. Wszystko jest zaplanowane. Nawet to.",
@@ -771,7 +771,7 @@ const CHAT_MSGS = {
   "Nicolas Cane": [
     "Hej. Nie wiem czy Vogel ci powiedział, ale sektor 7-C jest zamknięty. Nie pytaj dlaczego.",
     "Widziałem twoje odpowiedzi w kwestionariuszu. Interesujące. Bardzo interesujące.",
-    "Jestem Nicolas Cane. Uczę Obrony przed Czarną Magią. I kilku innych rzeczy, których nie ma w programie.",
+    "Jestem Nicolas Cane. Uczę o Salemowym Backrooms. I kilku innych rzeczy, których nie ma w programie.",
     "Słyszysz to? Ten szum? Dobry znak. Znaczy że system cię już… zauważył.",
     "Nie ufaj mapom Salem. Korytarze się przesuwają. Sam sprawdziłem.",
     "Twój dom to dobry wybór. Albo dom wybrał ciebie. Trudno powiedzieć które.",
