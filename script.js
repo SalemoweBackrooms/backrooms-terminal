@@ -23,7 +23,7 @@ function g(m, k, i) {
 document.addEventListener("click", () => {
   if (audioStarted) return;
   const hum = document.getElementById("hum");
-  hum.volume = 0.6;
+  hum.volume = 0.05;
   hum.play().catch(() => {});
   audioStarted = true;
 });
@@ -33,6 +33,9 @@ function playSafe(id) {
   if (!a) return;
   a.pause();
   a.currentTime = 0;
+  if (id === "hum")      a.volume = 0.05;
+  if (id === "glitch")   a.volume = 0.08;
+  if (id === "activity") a.volume = 0.10;
   a.play().catch(() => {});
 }
 
