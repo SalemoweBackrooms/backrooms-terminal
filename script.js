@@ -23,7 +23,7 @@ function g(m, k, i) {
 document.addEventListener("click", () => {
   if (audioStarted) return;
   const hum = document.getElementById("hum");
-  hum.volume = 0.05;
+  hum.volume = 0.6;
   hum.play().catch(() => {});
   audioStarted = true;
 });
@@ -104,13 +104,41 @@ function getNadzorcaMsg() {
   return "NADZORCA: " + msg;
 }
 
+function glitchScanSweep() {
+  const sweep = document.createElement("div");
+  sweep.style.cssText = `
+    position:fixed; inset:0; z-index:960; pointer-events:none;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0,255,100,0.04) 48%,
+      rgba(255,0,0,0.07) 50%,
+      rgba(0,255,100,0.04) 52%,
+      transparent 100%
+    );
+    background-size: 100% 200%;
+    animation: scanSweepAnim 0.6s linear forwards;
+  `;
+  document.body.appendChild(sweep);
+  setTimeout(() => sweep.remove(), 700);
+}
+
+function glitchRedShift() {
+  document.body.style.textShadow = "2px 0 #ff0000, -2px 0 #00ffff";
+  setTimeout(() => { document.body.style.textShadow = ""; }, 120);
+}
+
 function nadzorcaTick() {
   const el = document.getElementById("nadzorca");
   const msg = getNadzorcaMsg();
   el.classList.remove("alert");
 
-  // co jakiś czas "alert" — czerwony
   if (Math.random() > 0.75) el.classList.add("alert");
+
+  // losowy dodatkowy efekt horror
+  const roll = Math.random();
+  if (roll > 0.82) glitchScanSweep();
+  else if (roll > 0.70) glitchRedShift();
 
   typewriterEl(el, msg, 28, () => {});
   setTimeout(nadzorcaTick, 9000 + Math.random() * 6000);
@@ -243,10 +271,12 @@ function validateQuiz() {
   const q1 = document.getElementById("q1").value;
   const q2 = document.getElementById("q2").value;
   const q3 = document.getElementById("q3").value;
+  const q4 = document.getElementById("q4").value;
+  const q5 = document.getElementById("q5").value;
   const errEl   = document.getElementById("quizError");
   const timerEl = document.getElementById("quizTimer");
 
-  if (!q1 || !q2 || !q3) {
+  if (!q1 || !q2 || !q3 || !q4 || !q5) {
     errEl.classList.remove("hidden");
     glitch();
     return;
@@ -263,25 +293,27 @@ function validateQuiz() {
     // Zmuś czekać jeszcze chwilę
     setTimeout(() => {
       timerEl.classList.add("hidden");
-      analyze(q1, q2, q3);
+      analyze(q1, q2, q3, q4, q5);
     }, 2500);
     return;
   }
 
   timerEl.classList.add("hidden");
-  analyze(q1, q2, q3);
+  analyze(q1, q2, q3, q4, q5);
 }
 
 /* ═══════════════════════════════════════════════════
    ANALYZE
 ═══════════════════════════════════════════════════ */
-function analyze(q1, q2, q3) {
+function analyze(q1, q2, q3, q4, q5) {
   const score =
     (q1 === "TAK" ? 1 : 0) +
     (q2 === "TAK" ? 1 : 0) +
-    (q3 === "TAK" ? 1 : 0);
+    (q3 === "TAK" ? 1 : 0) +
+    (q4 === "TAK" || q4 === "NIE JESTEM PEWIEN / PEWNA" ? 1 : 0) +
+    (q5 === "TAK" || q5 === "ZAWSZE TAK BYŁO" ? 1 : 0);
 
-  status = score >= 2 ? "ANOMALY" : "STABLE";
+  status = score >= 3 ? "ANOMALY" : "STABLE";
   userID = generateID();
 
   show("loading");
@@ -437,7 +469,7 @@ const HOUSES = {
     color1:  "#3b1f5e",
     color2:  "#c9a0dc",
     label:   "KADRA SALEM",
-    crest:   "✦",
+    crest:   "📖",
     title:   "Nauczyciel / Kadra",
     motto:   "Uczysz magii. System uczy ciebie.",
     facts: [
@@ -683,11 +715,19 @@ function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote
 ═══════════════════════════════════════════════════ */
 function downloadFile() {
   if (!fileHTML) { alert("FILE NOT READY"); return; }
-  const blob = new Blob([fileHTML], { type: "text/html" });
-  const a    = document.createElement("a");
-  a.href     = URL.createObjectURL(blob);
-  a.download = `BACKROOMS_AKTA_${userID}.html`;
-  a.click();
+  const win = window.open("", "_blank");
+  win.document.write(fileHTML.replace("</head>", `<style>
+    @media print {
+      body { background: #b0a898 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 400);
+    };
+  <\/script>
+  </head>`));
+  win.document.close();
 }
 
 /* ═══════════════════════════════════════════════════
