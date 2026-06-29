@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title>BACKROOMS INSTITUTE // NODE 0</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  @import url('https://fonts.cdnfonts.com/css/scriptina-2');
+  @import url('https://fonts.cdnfonts.com/css/onesignature');
+</style>
 </head>
 <body>
 
@@ -15,6 +19,22 @@
 <div id="scanline"></div>
 <div id="glitchOverlay"></div>
 <div id="crtVignette"></div>
+
+<!-- CHAT POPUP -->
+<div id="chatPopup" class="chat-popup hidden">
+  <div class="chat-header">
+    <span class="chat-sender" id="chatSender"></span>
+    <span class="chat-status">● POŁĄCZONO</span>
+  </div>
+  <div class="chat-body">
+    <p class="chat-msg" id="chatMsg"></p>
+  </div>
+  <div class="chat-actions">
+    <button class="chat-btn" onclick="chatRespond('ok')">OK</button>
+    <button class="chat-btn" onclick="chatRespond('nie')">NIE</button>
+    <button class="chat-btn chat-btn-ignore" onclick="chatRespond('ignoruj')">IGNORUJ</button>
+  </div>
+</div>
 
 <!-- BOOT -->
 <section id="boot" class="screen active">
