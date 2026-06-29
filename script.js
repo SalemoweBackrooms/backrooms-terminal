@@ -206,6 +206,8 @@ function runBoot() {
 }
 
 function bootProceed() {
+  document.removeEventListener("click", bootProceed);
+  document.removeEventListener("keydown", bootProceed);
   glitch(true);
   setTimeout(() => next("intro"), 350);
 }
