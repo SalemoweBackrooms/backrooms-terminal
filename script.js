@@ -738,23 +738,44 @@ function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote
 }
 
 /* ═══════════════════════════════════════════════════
-   DOWNLOAD
+   DOWNLOAD — drukowanie przez ukryty iframe (bez pustej karty)
 ═══════════════════════════════════════════════════ */
 function downloadFile() {
   if (!fileHTML) { alert("FILE NOT READY"); return; }
-  const win = window.open("", "_blank");
-  win.document.write(fileHTML.replace("</head>", `<style>
+
+  // Usuń ewentualny stary iframe
+  const old = document.getElementById("printFrame");
+  if (old) old.remove();
+
+  const iframe = document.createElement("iframe");
+  iframe.id = "printFrame";
+  iframe.style.cssText = "position:fixed; right:0; bottom:0; width:0; height:0; border:0; visibility:hidden;";
+  document.body.appendChild(iframe);
+
+  const printCSS = `<style>
     @media print {
       body { background: #b0a898 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
-  </style>
-  <script>
-    window.onload = function() {
-      setTimeout(function() { window.print(); }, 400);
-    };
-  <\/script>
-  </head>`));
-  win.document.close();
+  </style>`;
+
+  const docContent = fileHTML.replace("</head>", printCSS + "</head>");
+
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(docContent);
+  doc.close();
+
+  iframe.onload = () => {
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      // Posprzątaj po wydrukowaniu (daj czas na dialog druku)
+      setTimeout(() => {
+        const f = document.getElementById("printFrame");
+        if (f) f.remove();
+      }, 1000);
+    }, 300);
+  };
 }
 
 /* ═══════════════════════════════════════════════════
