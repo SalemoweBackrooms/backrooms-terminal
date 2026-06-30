@@ -721,11 +721,11 @@ function buildDocHTML({ name, surname, age, date, house, statusNote, fact, quote
     <div class="doc-label">Podpisy autoryzujące</div>
     <div class="doc-signatures">
       <div class="doc-sig-block">
-        <div class="doc-sig-name" style="font-family:'Scriptina',cursive; font-size:28px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nickolas Vogel</div>
+        <div class="doc-sig-name" style="font-family:'Scriptina',cursive; font-size:26px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nickolas Vogel</div>
         <div class="doc-sig-title">Nickolas Vogel — Prowadzący Kurs</div>
       </div>
       <div class="doc-sig-block">
-        <div class="doc-sig-name" style="font-family:'OneSignature',cursive; font-size:32px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nicolas Cane</div>
+        <div class="doc-sig-name" style="font-family:'OneSignature',cursive; font-size:30px; line-height:1.2; color:#1a1a1a; margin-bottom:2px;">Nicolas Cane</div>
         <div class="doc-sig-title">Nicolas Cane — Prowadzący Kurs</div>
       </div>
     </div>
